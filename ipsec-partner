@@ -701,6 +701,7 @@ EOF
     # configure firewalld
     #
     err=0
+    systemctl start firewalld
     firewall-cmd --zone=internal --add-interface=$if_local --permanent || ((err = err + 1))
     firewall-cmd --direct --permanent --add-rule ipv4 filter FORWARD 0 -i ens3 -p tcp --dport 22 -j ACCEPT || ((err = err + 1))
     firewall-cmd --direct --permanent --add-rule ipv4 filter FORWARD 0 -o ens3 -p tcp --sport 22 -j ACCEPT || ((err = err + 1))
