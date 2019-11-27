@@ -11,7 +11,7 @@ yum -y install jq
 
 
 echo -n "Preparing status directories..."
-\rm -r /run/ipsec-partner/*
+[ -d /run/ipsec-partner ] && rm -rf /run/ipsec-partner
 
 mkdir -p /run/ipsec-partner/status/ipsec/whack
 mkdir -p /run/ipsec-partner/status/ip/tunnel
@@ -21,7 +21,7 @@ echo OK
 
 
 echo -n "Making utilities available..."
-\rm -r /opt/ipsec-partner/*
+[ -d /opt/ipsec-partner ] && rm -rf /opt/ipsec-partner
 mkdir -p /opt/ipsec-partner/bin
 mkdir -p /opt/ipsec-partner/sbin
 
@@ -37,7 +37,7 @@ echo OK
 
 #
 echo -n "Updating crontab..."
-grep "$change_label1" /etc/crontab >/dev/null
+grep "$change_label1" /etc/crontab
 if [ $? -eq 0 ]; then
     echo "Skipped. Change already done."
 else
