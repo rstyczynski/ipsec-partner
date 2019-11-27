@@ -754,8 +754,10 @@ EOF
     ipsec_configure
 
     echo "Configure monitoring..."
+    cd monitoring
     . monitoring/ipsec-partner-monitoring-install.sh
-
+    cd ..
+    
     #
     # Done.
     #
