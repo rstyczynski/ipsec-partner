@@ -5,7 +5,7 @@
 ### install
 ###
 
-unset ipsec-partner-install
+#unset ipsec-partner-install
 function ipsec-partner-install() {
 
     # in case of error continue
@@ -136,7 +136,7 @@ EOF
 ### functions
 ###
 
-unset clear_variables
+#unset clear_variables
 function clear_variables() {
     var_prefix=$1
 
@@ -146,12 +146,12 @@ function clear_variables() {
 
     for prefix in $var_prefix; do
         for var in $(comm -3 <(comm -3 <(declare | sort) <(declare -f | sort)) <(env | sort) | grep "^$prefix" | cut -d= -f1); do
-            unset $var
+            #unset $var
         done
     done
 }
 
-unset get_tunnel_def
+#unset get_tunnel_def
 function get_tunnel_def() {
 
     required_envs="ipsec_name ipsec_aws_openswan_cfg ipsec_aws_generic_cfg ipsec_id ipsec_leftsubnet_route ipsec_rightsubnet_route"
@@ -181,7 +181,7 @@ function get_tunnel_def() {
     echo tunnel2_vti_routing=no
 }
 
-unset get_aws_openswan_def
+#unset get_aws_openswan_def
 function get_aws_openswan_def() {
     aws_vpn_def_file=$1
     tunnelId=$2
@@ -199,7 +199,7 @@ function get_aws_openswan_def() {
         sed -e "s/^/tunnel$tunnelId\\_/"
 }
 
-unset get_aws_generic_def
+#unset get_aws_generic_def
 function get_aws_generic_def() {
     aws_vpn_def_file=$1
     tunnelId=$2
@@ -216,7 +216,7 @@ function get_aws_generic_def() {
 ###
 ###
 
-unset prepare_tunnel_cfg
+#unset prepare_tunnel_cfg
 function prepare_tunnel_cfg() {
     partner_name=$1
 
@@ -276,7 +276,7 @@ function prepare_tunnel_cfg() {
         [ $(comm -3 <(comm -3 <(declare | sort) <(declare -f | sort)) <(env | sort) | grep "^tunnel2_" | wc -l) -eq 23 ] && echo OK || echo ERROR
 }
 
-unset get_partner_configuration
+#unset get_partner_configuration
 function get_partner_configuration() {
     partner_name=$1
 
@@ -294,7 +294,7 @@ function get_partner_configuration() {
 ### Generate libreswan cfg files
 ###
 
-unset generate_libreswan_cfg
+#unset generate_libreswan_cfg
 function generate_libreswan_cfg() {
 
     echo -n "Generating tunnel & secrets..."
@@ -374,7 +374,7 @@ EOF
 ### Generate libreswan updown script
 ###
 
-unset generate_libreswan_updown
+#unset generate_libreswan_updown
 function generate_libreswan_updown() {
 
     echo -n "Generating pluto_updown..."
@@ -462,7 +462,7 @@ EOF
     echo "OK"
 }
 
-unset ipsec_configure
+#unset ipsec_configure
 function ipsec_configure() {
     echo -n "Preparing directory to keep partner link configurations..."
     [ ! -d /etc/ipsec.d/partners ] && mkdir /etc/ipsec.d/partners
@@ -499,7 +499,7 @@ EOF
     generate_libreswan_updown
 }
 
-unset ipsec_configure_partner
+#unset ipsec_configure_partner
 function ipsec_configure_partner() {
     partner_name=$1
 
@@ -533,7 +533,7 @@ function ipsec_configure_partner() {
 # TODO Check if vti ip subnet is not used by other partner link
 # TODO Check if right side netowrk is not overlaping with ther partner link
 #
-unset configure_partner
+#unset configure_partner
 function configure_partner() {
     partner_name=$1
     shift
@@ -619,7 +619,7 @@ function configure_partner() {
 #
 # test partner link
 #
-unset ipsec_test_partner
+#unset ipsec_test_partner
 function ipsec_test_partner() {
     partner_name=$1
 
@@ -726,7 +726,7 @@ function ipsec_test_partner() {
 #
 # install
 #
-unset register_ipsec_partner
+#unset register_ipsec_partner
 function register_ipsec_partner() {
     cat /etc/bashrc | grep '^# ipsec-partner start' >/dev/null
     if [ $? -ne 0 ]; then
@@ -755,7 +755,7 @@ EOF
 #
 # Install 
 #
-unset ipsec_partner_install
+#unset ipsec_partner_install
 function ipsec_partner_install() {
 
     # in case of error continue
@@ -894,8 +894,12 @@ EOF
 # main()
 #
 function main() {
-    functions=$(cat /usr/sbin/ipsec-partner | grep '^function' | sed 's/function //; s/() {//' | tr '\n' ', ' | sed 's/,main,/./')
-    echo "ipsec-partner is now available with following fuctions: $functions"
+    if [ -f /usr/sbin/ipsec-partner ]; then
+       functions=$(cat /usr/sbin/ipsec-partner | grep '^function' | sed 's/function //; s/() {//' | tr '\n' ', ' | sed 's/,main,/./')
+       echo "ipsec-partner is now available with following fuctions: $functions"
+    else
+       echo "ipsec-partner is not available in /usr/sbin. Use install mode: sudo ./ipsec-partner ipsec-partner-install"
+    fi
 }
 
 if [ -z "$1" ]; then
