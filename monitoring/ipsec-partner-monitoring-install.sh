@@ -50,7 +50,7 @@ echo -n "Configuring http access..."
 
 cp ipsec-partner.conf  /etc/httpd/conf.d/ipsec-partner.conf 
 
-ln -s /run/ipsec-partner/status /var/www/html/ipsec-partner
+[ ! -d /var/www/html/ipsec-partner ] && ln -s /run/ipsec-partner/status /var/www/html/ipsec-partner
 
 chcon -R -t httpd_sys_content_t /var/www/html/ipsec-partner
 chcon -R -t httpd_sys_content_t /var/www/html/ipsec-partner/ip

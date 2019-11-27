@@ -11,8 +11,8 @@ if [ ! -d /run/ipsec-partner ]; then
 	mkdir -p /run/ipsec-partner/status/ipsec/whack
 	mkdir -p /run/ipsec-partner/status/ip/tunnel
 	chmod -R 755 /run/ipsec-partner/*
-	
-	ln -s /run/ipsec-partner/status /var/www/html/ipsec-partner
+
+	[ ! -d /var/www/html/ipsec-partner ] && ln -s /run/ipsec-partner/status /var/www/html/ipsec-partner
 	chcon -R -t httpd_sys_content_t /var/www/html/ipsec-partner
 	chcon -R -t httpd_sys_content_t /var/www/html/ipsec-partner/ip
 	chcon -R -t httpd_sys_content_t /var/www/html/ipsec-partner/ip/tunnel
