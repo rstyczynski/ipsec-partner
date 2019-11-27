@@ -14,7 +14,7 @@ function clear_variables() {
 
     for prefix in $var_prefix; do
         for var in $(comm -3 <(comm -3 <(declare | sort) <(declare -f | sort)) <(env | sort) | grep "^$prefix" | cut -d= -f1); do
-            #unset $var
+            unset $var
         done
     done
 }
