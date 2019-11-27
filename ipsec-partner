@@ -736,7 +736,7 @@ EOF
     # Install ipsec-partner
     #
     echo -n "Add ipsec-partner to /usr/sbin..."
-    cp $install_home/ipsec-partner /usr/sbin/ipsec-partner
+    cp -f $install_home/ipsec-partner /usr/sbin/ipsec-partner
     chmod +x /usr/sbin/ipsec-partner
     echo "OK"
 
