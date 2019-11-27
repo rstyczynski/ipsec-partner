@@ -4,8 +4,6 @@ what='ipsec-partner monitor install script'
 change_label1="added by >>$what<<"
 change_label2="by $(whoami) on $(date)"
 
-set -e
-
 echo "Installing packages..."
 yum -y install jq
 
@@ -37,7 +35,7 @@ echo OK
 
 #
 echo -n "Updating crontab..."
-grep "$change_label1" /etc/crontab
+cat /etc/crontab | grep "$change_label1" 
 if [ $? -eq 0 ]; then
     echo "Skipped. Change already done."
 else
