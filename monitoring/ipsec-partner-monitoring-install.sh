@@ -5,7 +5,7 @@ change_label1="added by >>$what<<"
 change_label2="by $(whoami) on $(date)"
 
 echo "Installing packages..."
-yum -y install jq
+yum -y install jq httpd
 
 
 echo -n "Preparing status directories..."
