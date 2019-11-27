@@ -35,7 +35,7 @@ echo OK
 
 #
 echo -n "Updating crontab..."
-cat /etc/crontab | grep "$change_label1" 
+grep "$change_label1" /etc/crontab >/dev/null
 if [ $? -eq 0 ]; then
     echo "Skipped. Change already done."
 else
