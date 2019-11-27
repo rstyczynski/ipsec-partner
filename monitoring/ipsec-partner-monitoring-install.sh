@@ -7,7 +7,7 @@ change_label2="by $(whoami) on $(date)"
 set -e
 
 echo "Installing packages..."
-yum install jq
+yum -y install jq
 
 
 echo -n "Preparing status directories..."
