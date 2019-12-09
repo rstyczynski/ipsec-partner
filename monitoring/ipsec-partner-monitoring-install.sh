@@ -4,6 +4,28 @@ what='ipsec-partner monitor install script'
 change_label1="added by >>$what<<"
 change_label2="by $(whoami) on $(date)"
 
+#
+# helper functions
+#
+function get_ipsec_names {
+
+    DATA=$(cd /etc/ipsec.d/partners; grep '^ipsec_name=' *.cfg 2>/dev/null)
+    if [ $? == 0 ]; then
+        for line in $(echo $DATA); do
+            left=$(echo $line | cut -f1 -d'.')
+            right=$(echo $line | cut -f2 -d'=')
+
+            if [ "$left" == "$right" ]; then
+                echo $left
+            fi
+        done
+    fi
+}
+
+#
+# install procedure
+#
+
 echo "Installing packages..."
 yum -y install jq httpd
 
@@ -23,9 +45,14 @@ echo -n "Making utilities available..."
 mkdir -p /opt/ipsec-partner/bin
 mkdir -p /opt/ipsec-partner/sbin
 
+# user utilities
 cp trafficstatus2json.py /opt/ipsec-partner/bin
 cp tunnel2json.py /opt/ipsec-partner/bin
+cp resource_state_filter.py /opt/ipsec-partner/bin
+
+# system utilities
 cp status_update.sh /opt/ipsec-partner/sbin
+cp ipsec-partner_oci.sh /opt/ipsec-partner/sbin
 
 chmod +x /opt/ipsec-partner/bin/*.py
 chmod +x /opt/ipsec-partner/sbin/*.sh
@@ -41,6 +68,11 @@ if [ $? -eq 0 ]; then
 else
     echo "# >> $change_label1" >>/etc/crontab
     echo '  *  *  *  *  * root      /opt/ipsec-partner/sbin/status_update.sh' >>/etc/crontab
+
+    for named_cfg in $(get_ipsec_names); do
+        echo "  *  *  *  *  * root      sleep 5;/opt/ipsec-partner/sbin/ipsec-partner_oci.sh  --ipsec-name $named_cfg --debug NO" >>>>/etc/crontab
+    done
+
     echo "# << $change_label1" >>/etc/crontab
     echo 'OK'
 fi
