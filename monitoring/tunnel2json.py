@@ -66,8 +66,6 @@ for line in sys.stdin:
                 'Mcasts': int(vti_rxdesc.group(6))
             }
             vti_attributes[vti_name].update({'RX': vti_ifheader})
-
-
     elif vti_cnt == 3:
         expected='TX: Packets    Bytes        Errors DeadLoop NoRoute  NoBufs\n'
         if(line != expected):
@@ -75,18 +73,17 @@ for line in sys.stdin:
             print('Actual', line)
             raise ValueError('Expected TX line not found')
     elif vti_cnt == 4:
-        vti_desc = re.match(vti_tx_format, line)
-        if vti_desc:
+        vti_txdesc = re.match(vti_tx_format, line)
+        if vti_txdesc:
             vti_ifheader={
-                'Packets': int(vti_rxdesc.group(1)),
-                'Bytes': int(vti_rxdesc.group(2)),
-                'Errors': int(vti_rxdesc.group(3)),
-                'DeadLoop': int(vti_rxdesc.group(4)),
-                'NoRoute': int(vti_rxdesc.group(5)),
-                'NoBufs': int(vti_rxdesc.group(6))
+                'Packets': int(vti_txdesc.group(1)),
+                'Bytes': int(vti_txdesc.group(2)),
+                'Errors': int(vti_txdesc.group(3)),
+                'DeadLoop': int(vti_txdesc.group(4)),
+                'NoRoute': int(vti_txdesc.group(5)),
+                'NoBufs': int(vti_txdesc.group(6))
             }
             vti_attributes[vti_name].update({'TX': vti_ifheader})
-
     else:
         raise ValueError('Unknown format.')
 
