@@ -26,6 +26,18 @@ function get_ipsec_names {
 # install procedure
 #
 
+named_cfg=$1
+
+if [ -z "$named_cfg" ]; then
+    echo "Error: provide configuration name."
+    exit 1
+fi
+
+if [[ "$(get_ipsec_names)" != *"$named_cfg"* ]]; then
+    echo "Error: provided cfg not recognized."
+    exit 1
+fi
+
 echo "Installing packages..."
 yum -y install jq httpd
 
@@ -68,12 +80,18 @@ if [ $? -eq 0 ]; then
 else
     echo "# >> $change_label1" >>/etc/crontab
     echo '  *  *  *  *  * root      /opt/ipsec-partner/sbin/status_update.sh' >>/etc/crontab
-
-    for named_cfg in $(get_ipsec_names); do
-        echo "  *  *  *  *  * root      sleep 5;/opt/ipsec-partner/sbin/ipsec-partner_oci.sh  --ipsec-name $named_cfg --debug NO" >>/etc/crontab
-    done
-
     echo "# << $change_label1" >>/etc/crontab
+    echo 'OK'
+fi
+
+echo -n "Updating crontab for $named_cfg..."
+grep "$change_label1 for $named_cfg" /etc/crontab >/dev/null
+if [ $? -eq 0 ]; then
+    echo "Skipped. Change already done."
+else
+    echo "# >> $change_label1 for $named_cfg" >>/etc/crontab
+    echo "  *  *  *  *  * root      sleep 5;/opt/ipsec-partner/sbin/ipsec-partner_oci.sh  --ipsec-name $named_cfg --debug NO" >>/etc/crontab
+    echo "# << $change_label1 for $named_cfg" >>/etc/crontab
     echo 'OK'
 fi
 
