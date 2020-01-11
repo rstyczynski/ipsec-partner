@@ -70,7 +70,7 @@ else
     echo '  *  *  *  *  * root      /opt/ipsec-partner/sbin/status_update.sh' >>/etc/crontab
 
     for named_cfg in $(get_ipsec_names); do
-        echo "  *  *  *  *  * root      sleep 5;/opt/ipsec-partner/sbin/ipsec-partner_oci.sh  --ipsec-name $named_cfg --debug NO" >>>>/etc/crontab
+        echo "  *  *  *  *  * root      sleep 5;/opt/ipsec-partner/sbin/ipsec-partner_oci.sh  --ipsec-name $named_cfg --debug NO" >>/etc/crontab
     done
 
     echo "# << $change_label1" >>/etc/crontab
