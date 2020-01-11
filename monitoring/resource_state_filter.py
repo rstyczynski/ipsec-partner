@@ -422,7 +422,7 @@ if args.conditions:
         for down_label in args.conditions.split('/')[1].split(','):
             measurements[down_label] = 0
     except:
-       eprint("Error. Provide conditions in format up1,up2/down1,down2,down3.")
+       eprint("Error. Provide conditions in format alternative labels to up, slash, alternative labels for down i.e. up1,up2/down1,down2,down3.")
        exit(1)
 else:
     measurements['up'] = 1
