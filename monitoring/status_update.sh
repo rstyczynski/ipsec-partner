@@ -37,7 +37,7 @@ find /run/ipsec-partner/status/ipsec/whack -type f -not -newermt '-1 seconds' -e
 #
 
 # add tunnel 
-ip -s tunnel > /run/ipsec-partner/status/ip/tunnel/tunnel.raw
+ip -s tunnel  | egrep -A4 'vti101|vti102' | grep -v '^--$'  > /run/ipsec-partner/status/ip/tunnel/tunnel.raw
 cat /run/ipsec-partner/status/ip/tunnel/tunnel.raw | tunnel2json.py > /run/ipsec-partner/status/ip/tunnel/tunnel
 
 #add
