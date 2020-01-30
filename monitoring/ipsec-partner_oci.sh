@@ -278,6 +278,7 @@ assert_utilities "timeout date touch cat tr oci resource_state_filter.py"
 
 # check tunnel status
 # ipsec channel is up when file with data is visible. Otherwise line is down.
+
 updown='downup,updown,upup/downdown'
 [ -f $tmp/ipsec_partner_status ] && \rm $tmp/ipsec_partner_status
 for tunnel in $(seq 1 $tunnels); do

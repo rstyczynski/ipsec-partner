@@ -55,7 +55,7 @@ function restart_ipsec {
     result=0
     down_ipsec $partner_name $tunnel_no ; result=$(( $result + $? ))
     up_ipsec $partner_name $tunnel_no   ; result=$(( $result + $? ))
-
+    
     if [ $result -ne 0 ]; then
         echo 
         echo ' FAILED'
