@@ -137,7 +137,7 @@ More info: https://docs.cloud.oracle.com/en-us/iaas/tools/oci-cli/2.9.5/oci_cli_
 <longdesc lang="en">
 The number of the VNIC on the host to assign the private IP to. The VNIC and private IP must be in the same subnet.
 </longdesc>
-<shortdesc lang="en">VNIC id</shortdesc>
+<shortdesc lang="en">VNIC number on the host</shortdesc>
 </parameter>
 
 </parameters>
@@ -161,7 +161,7 @@ if [ ! "$action" == "meta-data" ]; then
     loginfo "oci_privateip: Initializing: $action, $OCF_RESKEY_ip, $OCF_RESKEY_vnic_no"
     # moved to start, as it's not changing
     vnic_id=$(curl -s -L http://169.254.169.254/opc/v1/vnics/ | jq -r .[$OCF_RESKEY_vnic_no].vnicId)
-    loginfo "oci_privateip: Initialized for: $oci_publicIp_id on $oci_vnic_Ip_id"
+    loginfo "oci_privateip: Initialized for: $OCF_RESKEY_ip on $vnic_id"
 fi
 
 case $action in
