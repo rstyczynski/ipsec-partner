@@ -69,12 +69,12 @@ function hasPrivateIp() {
 
         # let's use assign  w/o force option
         oci network vnic assign-private-ip \
-                --vnic-id $OCF_RESKEY_vnic_id \
-                --ip-address $OCF_RESKEY_ip > /run/oci/private_ip_gentleassign.json 2>/run/oci/private_ip_gentleassign.err
+                --vnic-id $oci_vnic_id \
+                --ip-address $oci_private_ip > /run/oci/private_ip_gentleassign.json 2>/run/oci/private_ip_gentleassign.err
         if [ $? -eq 0 ] ; then
             if [ $(stat -c%s /run/oci/private_ip_gentleassign.err) -gt 0 ]; then
 
-                grep "Taking no action as IP address $OCF_RESKEY_ip is already assigned to VNIC $OCF_RESKEY_vnic_id" /run/oci/private_ip_gentleassign.err >/dev/nul 2>&1
+                grep "Taking no action as IP address $oci_private_ip is already assigned to VNIC $oci_vnic_id" /run/oci/private_ip_gentleassign.err >/dev/nul 2>&1
                 if [ $? -eq 0 ]; then 
                     logdebug "hasPrivateIp: Already assigned. Response: $(cat /run/oci/private_ip_gentleassign.json), $(cat /run/oci/private_ip_gentleassign.err)"
                     return 0
@@ -133,9 +133,9 @@ More info: https://docs.cloud.oracle.com/en-us/iaas/tools/oci-cli/2.9.5/oci_cli_
 <shortdesc lang="en">Private IP</shortdesc>
 </parameter>
 
-<parameter name="vnic_id" unique="0" required="1">
+<parameter name="vnic_no" unique="0" required="1">
 <longdesc lang="en">
-The OCID of the VNIC to assign the private IP to. The VNIC and private IP must be in the same subnet.
+The number of the VNIC on the host to assign the private IP to. The VNIC and private IP must be in the same subnet.
 </longdesc>
 <shortdesc lang="en">VNIC id</shortdesc>
 </parameter>
@@ -156,16 +156,24 @@ EOF
 umask 077
 mkdir -p /run/oci
 
+
+if [ ! "$action" == "meta-data" ]; then 
+    loginfo "oci_privateip: Initializing: $action, $OCF_RESKEY_ip, $OCF_RESKEY_vnic_no"
+    # moved to start, as it's not changing
+    vnic_id=$(curl -s -L http://169.254.169.254/opc/v1/vnics/ | jq -r .[$OCF_RESKEY_vnic_no].vnicId)
+    loginfo "oci_privateip: Initialized for: $oci_publicIp_id on $oci_vnic_Ip_id"
+fi
+
 case $action in
 
 start)
-    if hasPrivateIp $OCF_RESKEY_ip $OCF_RESKEY_vnic_id; then
+    if hasPrivateIp $OCF_RESKEY_ip $vnic_id; then
         result=$OCF_SUCCESS
     else
         # resource parameters
         # http://www.linux-ha.org/doc/dev-guides/_api_definitions.html#_environment_variables
         timeout 15 oci network vnic assign-private-ip \
-            --vnic-id $OCF_RESKEY_vnic_id \
+            --vnic-id $vnic_id \
             --unassign-if-already-assigned \
             --ip-address $OCF_RESKEY_ip > /run/oci/private_ip_assign.json 2>/run/oci/private_ip_assign.err
         if [ $? -eq 0 ] ; then
@@ -180,11 +188,11 @@ start)
     fi
     ;;
 stop)
-    if hasPrivateIp $OCF_RESKEY_ip $OCF_RESKEY_vnic_id; then
+    if hasPrivateIp $OCF_RESKEY_ip $vnic_id; then
         # resource parameters
         # http://www.linux-ha.org/doc/dev-guides/_api_definitions.html#_environment_variables
         timeout 15 oci network vnic unassign-private-ip \
-            --vnic-id $OCF_RESKEY_vnic_id \
+            --vnic-id $vnic_id \
             --ip-address $OCF_RESKEY_ip > /run/oci/private_ip_unassign.json 2>/run/oci/private_ip_unassign.err
         if [ $? -eq 0 ] ; then
             \rm -f /run/oci/private_ip_assign.json
@@ -204,7 +212,7 @@ meta-data)
 status | monitor)
     # resource parameters
     # http://www.linux-ha.org/doc/dev-guides/_api_definitions.html#_environment_variables
-    if hasPrivateIp $OCF_RESKEY_ip $OCF_RESKEY_vnic_id; then
+    if hasPrivateIp $OCF_RESKEY_ip $vnic_id; then
         result=$OCF_SUCCESS
     else
         result=$OCF_NOT_RUNNING
