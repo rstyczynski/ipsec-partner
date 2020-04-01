@@ -53,4 +53,7 @@
     #
     - name: run assisted OCI CLI install
       become: yes
-      command: oci iam availability-domain list
+      shell: oci iam availability-domain list
+      register: oci_test_result
+
+    - debug: "msg=out={{ oci_test_result.stdout }}, err: {{ oci_test_result.stdout }}"
