@@ -1,9 +1,3 @@
-#!/bin/bash
-
-curl -s -L https://raw.githubusercontent.com/oracle/oci-cli/master/scripts/install/install.sh >cli_install.sh
-chmod +x cli_install.sh
-
-cat >install_oci_cli.expect <<EOF
 #!/usr/bin/expect
 
 set HOME [lindex $argv 0];
@@ -34,12 +28,3 @@ expect "===> Enter a path to an rc file to update (leave blank to use '$HOME/.ba
 send "\r"
 
 interact
-
-EOF
-
-expect install_oci_cli.expect $HOME
-
-\rm -f install_oci_cli.expect
-\rm -f cli_install.sh
-
-echo "Done."
