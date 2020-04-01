@@ -24,6 +24,7 @@
     copy:
       src: ipsec_cluster.config
       dest: /etc/ipsec_partner
+      force: yes
       mode: '0400'
 
 #
