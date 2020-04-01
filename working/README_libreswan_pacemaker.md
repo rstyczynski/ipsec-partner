@@ -52,7 +52,7 @@ Creates info and debug trace at /var/log/oci_publicip.log
 Both resource managers works in DEBUG mode now, logging each interaction with OCI platform.
 
 # OCI CLI
-OCI resource managers requires access to OCI thus installation and configuration of Oracle OCI is required. Automated installation of Oracle OCI CLI is described here: [README](XXX)
+OCI resource managers requires access to OCI thus installation and configuration of Oracle OCI is required. Automated installation of Oracle OCI CLI is described here: [README](https://github.com/rstyczynski/ipsec-partner/blob/master/working/README_OCI_CLI.md)
 
 # Libreswan pacemaker cluster
 Having resource managers able to handle private and public IP pacemaker may be used to do manage the cluster. The goal is to route traffic directed to AWS networks via functional node, bypassing faulted one. What statutes the fault? I decided to build it out of following rules:
@@ -84,7 +84,7 @@ To install the cluster you need to:
 Having above you may configure the cluster. 
 
 # Installation - OCI CLI
-OCI CLI installation is described in separated [README](xxx). Complete is before taking next steps.
+OCI CLI installation is described in separated [README](https://github.com/rstyczynski/ipsec-partner/blob/master/working/README_OCI_CLI.md). Complete is before taking next steps.
 
 ## Libreswan cluster deployment
 Libreswan cluster deployment is automated to maximum extend. The only thing is to ensure you have tool to generate password (which after configuration is not important), and fill configuration files. Files are in yaml and ini formats, which seems to be the best to describe configuration. 

@@ -20,9 +20,9 @@ Installation is performed from Linux session with available Ansible.
 Set parameters of your OCI environment.
 
 ```
-user_OCID=ocid1.user.oc1..aaaaaaaavyu3rc4zpyx4f2jolovo6lu7wgnlm2ka6ce12hjxtlcaqmf6g6aa
-region=eu-frankfurt-1
-tenancy=ocid1.tenancy.oc1..aaaaaaaar5xao67r6wpagf2ubhpwgow2hkyxqp2khcfpgt3vwfg4fm3auw7a
+user_OCID=ocid1.user.oc1..TAKE_FROM_YOUR_SYSTEM
+region=eu-frankfurt-1-TAKE_FROM_YOUR_SYSTEM
+tenancy=ocid1.tenancy.oc1..TAKE_FROM_YOUR_SYSTEM
 ```
 
 ## collect software
@@ -67,7 +67,7 @@ Specify list of target hosts to install OCI CLI. Use ansible format. If needed a
 cat >deploy_oci_cli.inventory <<EOF
 [oci_cli]
 192.168.1.51
-192.158.1.52 
+192.168.1.52 
 EOF
 ```
 
