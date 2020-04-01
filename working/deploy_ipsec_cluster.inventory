@@ -1,0 +1,3 @@
+[ipsec_cluster]
+node1 ansible_user=pmaker ipsec_cluster_role=master
+node2 ansible_user=pmaker 

@@ -1,0 +1,59 @@
+- hosts: private_ipsec_fra
+  became: yes
+
+  tasks:
+
+#
+# prepare configuration
+#
+  - name: create ipsec partner cfg directory
+    file:
+      path: /etc/ipsec_partner
+      state: directory
+      mode: '0700'
+
+  - name: create ipsec partner state directory
+    file:
+      path: /opt/ipsec-partner/state
+      state: directory
+      mode: '0700'
+
+  - name: copy cluster configuration
+    copy:
+      src: ipsec_cluster.config
+      dest: /etc/ipsec_partner
+
+#
+# register secondary vnic cfg servcie
+#
+  - name: register secondary vnic cfg servcie
+    script: register_secondary_vnic_unit.sh
+    args:
+      creates: /opt/ipsec-partner/state/register_secondary_vnic_unit.done
+
+#
+# prepare cluster nodes
+#
+  - name: prepare cluster node
+    script: pacemaker_cluster_node_prepare.sh /etc/ipsec_partner/ipsec_cluster.config
+    args:
+      creates: /opt/ipsec-partner/state/pacemaker_cluster_node_prepare.done
+  
+#
+# configure cluster - run only on one node
+#
+  - name: init pacemaker cluster
+    script: pacemaker_cluster_init.sh /etc/ipsec_partner/ipsec_cluster.config
+    args:
+      creates: /opt/ipsec-partner/state/pacemaker_cluster_init.done
+    when: ipsec_cluster == 'master'
+
+  - name: init libreswan cluster
+    script: ipsec_cluster_init.sh /etc/ipsec_partner/ipsec_cluster.config
+    args:
+      creates: /opt/ipsec-partner/state/ipsec_cluster_init.done
+    when: ipsec_cluster == 'master'
+
+
+
+    
