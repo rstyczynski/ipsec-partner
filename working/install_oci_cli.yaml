@@ -47,3 +47,10 @@
       script: install_oci_cli.sh
       args:
         creates: /opt/ipsec-partner/state/register_secondary_vnic_unit.done
+
+    #
+    # run OCI test call
+    #
+    - name: run assisted OCI CLI install
+      become: yes
+      command: oci iam availability-domain list
