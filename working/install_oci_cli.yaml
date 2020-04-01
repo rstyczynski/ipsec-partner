@@ -1,4 +1,6 @@
 - hosts: all
+  vars:
+    ipsec_key: oci_api_key_ipsec.pem
 
   tasks:
     - name: ensure a list of packages installed
