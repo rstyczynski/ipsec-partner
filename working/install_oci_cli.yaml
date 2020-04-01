@@ -21,10 +21,10 @@
         state: directory
         mode: "0700"
 
-    - name: copy oci_config
+    - name: copy config
       become: yes
       copy:
-        src: oci_config
+        src: config
         dest: ~/.oci
         force: yes
         mode: "0400"
