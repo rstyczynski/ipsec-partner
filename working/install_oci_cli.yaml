@@ -53,7 +53,7 @@
     #
     - name: run assisted OCI CLI install
       become: yes
-      shell: "export LC_ALL=C.UTF-8; export LANG=C.UTF-8; oci iam availability-domain list"
+      shell: "export LC_ALL=en_US.utf8; export LANG=en_US.utf8; oci iam availability-domain list"
       register: oci_test_result
 
     - debug: "msg=out={{ oci_test_result.stdout }}, err: {{ oci_test_result.stdout }}"
