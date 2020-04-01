@@ -85,7 +85,7 @@ op monitor interval=60s timeout="5s" \
 op start interval="0" timeout="5s" \
 op stop interval="0" timeout="5s"
 
-if [ ! -z "$libreswan_service" ]; then
+if [ ! "null" == "$libreswan_service" ]; then
     systemctl stop ipsec
     systemctl disable ipsec
     pcs resource create ipsec_cluster_libreswan systemd:$libreswan_service \
@@ -98,7 +98,7 @@ fi
 pcs constraint order ipsec_cluster_inet_ip then ipsec_cluster_private_ip
 pcs constraint order ipsec_cluster_private_ip then ipsec_cluster_public_ip
 pcs constraint order ipsec_cluster_public_ip then ipsec_cluster_routing
-if [ ! -z "$libreswan_service" ]; then 
+if [ ! "null" == "$libreswan_service" ]; then 
     pcs constraint order ipsec_cluster_routing then ipsec_cluster_libreswan
 fi
 
@@ -106,7 +106,7 @@ fi
 pcs constraint colocation add ipsec_cluster_private_ip with ipsec_cluster_inet_ip score=INFINITY
 pcs constraint colocation add ipsec_cluster_inet_ip with ipsec_cluster_public_ip score=INFINITY
 pcs constraint colocation add ipsec_cluster_public_ip with ipsec_cluster_routing score=INFINITY
-if [ ! -z "$libreswan_service" ]; then 
+if [ ! "null" == "$libreswan_service" ]; then 
     pcs constraint colocation add ipsec_cluster_routing with ipsec_cluster_libreswan score=INFINITY
 fi
 

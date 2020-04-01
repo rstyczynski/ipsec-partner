@@ -32,6 +32,7 @@ fi
 #
 pcs cluster auth $cluster_nodes -u hacluster -p $pass --force
 
+pcs cluster destroy --force --name ipsec_cluster $cluster_nodes 
 pcs cluster setup --force --name ipsec_cluster $cluster_nodes
 pcs cluster start --all
 
