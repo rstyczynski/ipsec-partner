@@ -51,14 +51,14 @@
     script: pacemaker_cluster_init.sh /etc/ipsec_partner/ipsec_cluster.config
     args:
       creates: /opt/ipsec-partner/state/pacemaker_cluster_init.done
-    when: ipsec_cluster_role[inventory_hostname] == 'master'
+    when: ipsec_cluster_role is defined and ipsec_cluster_role == 'master'
 
   - name: init libreswan cluster
     become: yes
     script: ipsec_cluster_init.sh /etc/ipsec_partner/ipsec_cluster.config
     args:
       creates: /opt/ipsec-partner/state/ipsec_cluster_init.done
-    when: ipsec_clusteripsec_cluster_role[inventory_hostname]_role == 'master'
+    when: ipsec_cluster_role is defined and ipsec_cluster_role == 'master'
 
 
 
