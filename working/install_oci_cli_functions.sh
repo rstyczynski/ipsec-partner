@@ -16,6 +16,15 @@ function generateKey {
     cat $ipsec_key\_public.pem
 }
 
+function getKey {
+    ipsec_key=$1
+    echo "Register this key fingerprint:"
+    echo $ipsec_key_fingerprint
+    echo
+    echo "Register this key in User's API Keys:"
+    cat $ipsec_key\_public.pem
+}
+
 function buildOCIconfig {
     cat >config  <<EOF
     [DEFAULT]
