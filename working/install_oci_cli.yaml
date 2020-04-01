@@ -2,6 +2,7 @@
 
   tasks:
   - name: ensure a list of packages installed
+    became: yes
     yum:
       name: "{{ packages }}"
     vars:
