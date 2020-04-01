@@ -70,7 +70,7 @@ op stop interval="0" timeout="5s"
 
 pcs resource create ipsec_cluster_public_ip  \
 ocf:heartbeat:oci_publicip \
-public_ip=$public_ip \
+publicIp=$public_ip \
 vnic_no=$public_ip_vnic_no \
 op monitor interval=60s timeout="30s" \
 op start interval="0" timeout="30s" \
