@@ -21,7 +21,7 @@ send "/var/oracle-cli/oci-cli-scripts\r"
 expect "What optional CLI packages would you like to be installed (comma separated names; press enter if you don't need any optional packages)?:"
 send "\r"
 
-expect "===> Modify profile to update your \$PATH and enable shell/tab completion now? (Y/n):"
+expect "===> Modify profile to update your \\$PATH and enable shell/tab completion now? (Y/n):"
 send "\r"
 
 expect "===> Enter a path to an rc file to update (leave blank to use '$HOME/.bashrc'):"
