@@ -18,6 +18,7 @@ function generateKey {
 
 function getKey {
     ipsec_key=$1
+    ipsec_key_fingerprint=$(openssl rsa -pubout -outform DER -in $ipsec_key.pem | openssl md5 -c | tr -d ' ' | cut -d= -f2)
     echo "Register this key fingerprint:"
     echo $ipsec_key_fingerprint
     echo
