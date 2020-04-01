@@ -34,6 +34,12 @@ pcs cluster auth $cluster_nodes -u hacluster -p $pass --force
 
 pcs cluster destroy --force --name ipsec_cluster $cluster_nodes 
 pcs cluster setup --force --name ipsec_cluster $cluster_nodes
+
+pcs property set stonith-enabled=false
+pcs property set no-quorum-policy=ignore
+pcs resource defaults resource-stickiness=100
+pcs resource defaults migration-threshold=5
+
 pcs cluster start --all
 
 pcs status
