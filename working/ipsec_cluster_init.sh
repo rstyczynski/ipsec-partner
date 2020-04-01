@@ -51,6 +51,11 @@ fi
 #
 # configure Libreswan cluster
 #
+
+systemctl restart pcsd.service
+systemctl restart corosync.service
+systemctl restart pacemaker.service
+
 pcs resource create ipsec_cluster_private_ip \
 ocf:heartbeat:oci_privateip \
 ip=$private_ip \
