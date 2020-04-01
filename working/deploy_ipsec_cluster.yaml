@@ -24,6 +24,7 @@
     copy:
       src: ipsec_cluster.config
       dest: /etc/ipsec_partner
+      mode: '0400'
 
 #
 # register secondary vnic cfg servcie
