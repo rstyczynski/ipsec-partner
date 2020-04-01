@@ -32,7 +32,7 @@
     - name: copy key
       become: yes
       copy:
-        src: oci_api_key.pem
+        src: {{ ipsec_key }}
         dest: ~/.oci
         force: yes
         mode: "0400"
