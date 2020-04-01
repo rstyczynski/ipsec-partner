@@ -8,7 +8,7 @@ cat >install_oci_cli.expect <<EOF
 
 set HOME [lindex $argv 0];
 
-set timeout 150
+set timeout 20
 
 spawn "./cli_install.sh"
 
