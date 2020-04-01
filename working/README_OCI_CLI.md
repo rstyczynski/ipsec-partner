@@ -75,7 +75,7 @@ EOF
 Once all preparation steps are completed. You may deploy OCI CLI to list of nodes specified in the inventory file. After deployment you should see OCI connectivity report for each node. I case of issues verify all parameters; add -vvv to below command line to see detailed debug information.
 
 ```
-ansible-playbook install_oci_cli.yaml-i deploy_oci_cli.inventory
+ansible-playbook install_oci_cli.yaml -i deploy_oci_cli.inventory
 ```
 
 All done.

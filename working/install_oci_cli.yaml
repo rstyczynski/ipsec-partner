@@ -51,7 +51,7 @@
     #
     # run OCI test call
     #
-    - name: run assisted OCI CLI install
+    - name: run OCI verification command
       become: yes
       shell: "export LC_ALL=en_US.utf8; export LANG=en_US.utf8; oci iam availability-domain list"
       register: oci_test_result
