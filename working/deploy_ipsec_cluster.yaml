@@ -43,24 +43,24 @@
     #
     - name: register secondary vnic cfg servcie
       become: yes
-      command: register_secondary_vnic_unit.sh
+      script: register_secondary_vnic_unit.sh
 
     #
     # prepare cluster nodes
     #
     - name: prepare cluster node
       become: yes
-      command: pacemaker_cluster_node_prepare.sh /etc/ipsec_partner/ipsec_cluster.config
+      script: pacemaker_cluster_node_prepare.sh /etc/ipsec_partner/ipsec_cluster.config
 
     #
     # configure cluster - run only on one node
     #
     - name: init pacemaker cluster
       become: yes
-      command: pacemaker_cluster_init.sh /etc/ipsec_partner/ipsec_cluster.config
+      script: pacemaker_cluster_init.sh /etc/ipsec_partner/ipsec_cluster.config
       when: ipsec_cluster_role is defined and ipsec_cluster_role == 'master'
 
     - name: init libreswan cluster
       become: yes
-      command: ipsec_cluster_init.sh /etc/ipsec_partner/ipsec_cluster.config
+      script: ipsec_cluster_init.sh /etc/ipsec_partner/ipsec_cluster.config
       when: ipsec_cluster_role is defined and ipsec_cluster_role == 'master'
