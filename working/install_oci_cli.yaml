@@ -1,52 +1,47 @@
 - hosts: all
 
   tasks:
-  - name: ensure a list of packages installed
-    became: yes
-    yum:
-      name: "{{ packages }}"
-    vars:
-      packages:
-      - expect
-      - python3
-      - curl
-  
-#
-# copy configuration
-#
-  - name: create oci home directory
-    become: yes
-    file:
-      path: ~/.oci
-      state: directory
-      mode: '0700'
+    - name: ensure a list of packages installed
+      became: yes
+      yum:
+        name: "{{ packages }}"
+      vars:
+        packages:
+          - expect
+          - python3
+          - curl
 
-  - name: copy oci_config
-    become: yes
-    copy:
-      src: oci_config
-      dest: ~/.oci
-      force: yes
-      mode: '0400'
+    #
+    # copy configuration
+    #
+    - name: create oci home directory
+      become: yes
+      file:
+        path: ~/.oci
+        state: directory
+        mode: "0700"
 
-  - name: copy key
-    become: yes
-    copy:
-      src: oci_api_key.pem
-      dest: ~/.oci
-      force: yes
-      mode: '0400'
+    - name: copy oci_config
+      become: yes
+      copy:
+        src: oci_config
+        dest: ~/.oci
+        force: yes
+        mode: "0400"
 
+    - name: copy key
+      become: yes
+      copy:
+        src: oci_api_key.pem
+        dest: ~/.oci
+        force: yes
+        mode: "0400"
 
-#
-# run assisted OCI CLI install
-#
-  - name: run assisted OCI CLI install
-    become: yes
-    script: install_oci_cli.sh
-    args:
-      creates: /opt/ipsec-partner/state/register_secondary_vnic_unit.done
-
-
-
-  
+    #
+    # run assisted OCI CLI install
+    #
+    - name: run assisted OCI CLI install
+      become: yes
+      script: install_oci_cli.sh
+      args:
+        creates: /opt/ipsec-partner/state/register_secondary_vnic_unit.done
