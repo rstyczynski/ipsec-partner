@@ -1,6 +1,18 @@
 - hosts: private_ipsec_fra
 
   tasks:
+    - name: ensure a list of packages installed
+      become: yes
+      yum:
+        name: "{{ packages }}"
+      vars:
+        packages:
+          - pacemaker    
+          - pcs
+          - resource-agents
+          - git
+          - jq
+
     #
     # prepare configuration
     #
@@ -31,32 +43,24 @@
     #
     - name: register secondary vnic cfg servcie
       become: yes
-      script: register_secondary_vnic_unit.sh
-      args:
-        creates: /opt/ipsec-partner/state/register_secondary_vnic_unit.done
+      command: register_secondary_vnic_unit.sh
 
     #
     # prepare cluster nodes
     #
     - name: prepare cluster node
       become: yes
-      script: pacemaker_cluster_node_prepare.sh /etc/ipsec_partner/ipsec_cluster.config
-      args:
-        creates: /opt/ipsec-partner/state/pacemaker_cluster_node_prepare.done
+      command: pacemaker_cluster_node_prepare.sh /etc/ipsec_partner/ipsec_cluster.config
 
     #
     # configure cluster - run only on one node
     #
     - name: init pacemaker cluster
       become: yes
-      script: pacemaker_cluster_init.sh /etc/ipsec_partner/ipsec_cluster.config
-      args:
-        creates: /opt/ipsec-partner/state/pacemaker_cluster_init.done
+      command: pacemaker_cluster_init.sh /etc/ipsec_partner/ipsec_cluster.config
       when: ipsec_cluster_role is defined and ipsec_cluster_role == 'master'
 
     - name: init libreswan cluster
       become: yes
-      script: ipsec_cluster_init.sh /etc/ipsec_partner/ipsec_cluster.config
-      args:
-        creates: /opt/ipsec-partner/state/ipsec_cluster_init.done
+      command: ipsec_cluster_init.sh /etc/ipsec_partner/ipsec_cluster.config
       when: ipsec_cluster_role is defined and ipsec_cluster_role == 'master'
