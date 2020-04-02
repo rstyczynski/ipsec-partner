@@ -50,7 +50,6 @@ getOCIresoures
 #
 # start deamons and and at boot time
 #
-
 systemctl start pcsd
 systemctl enable pcsd.service
 systemctl enable corosync.service
@@ -67,6 +66,15 @@ firewall-cmd --add-service=high-availability
 #
 bash -c "echo $pass | passwd --stdin hacluster"
 
+#
+# stop ipsec for boot time and now
+#
+systemctl stop ipsec.service
+systemctl disable ipsec.service
+
+#
+# done
+#
 echo "Cluster node configured."
 echo "Done."
 
