@@ -188,21 +188,27 @@ start)
     fi
     ;;
 stop)
-    if hasPrivateIp $OCF_RESKEY_ip $vnic_id; then
-        # resource parameters
-        # http://www.linux-ha.org/doc/dev-guides/_api_definitions.html#_environment_variables
-        timeout 15 oci network vnic unassign-private-ip \
-            --vnic-id $vnic_id \
-            --ip-address $OCF_RESKEY_ip > /run/oci/private_ip_unassign.json 2>/run/oci/private_ip_unassign.err
-        if [ $? -eq 0 ] ; then
-            \rm -f /run/oci/private_ip_assign.json
-            result=$OCF_SUCCESS
-            loginfo "oci_privateip: stopped OK: $result, $(cat /run/oci/private_ip_unassign.json), $(cat /run/oci/private_ip_unassign.err)"
-        else
-            result=$OCF_ERR_GENERIC
-            loginfo "oci_privateip: stopped with error: $result, $(cat /run/oci/private_ip_unassign.json), $(cat /run/oci/private_ip_unassign.err)"
-        fi
-    fi
+    # if hasPrivateIp $OCF_RESKEY_ip $vnic_id; then
+    #     # resource parameters
+    #     # http://www.linux-ha.org/doc/dev-guides/_api_definitions.html#_environment_variables
+    #
+    # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    # NEVER DETACH IP! It will be lost, next time you will attach it will be with different IP!
+    # ALWAYS RETURN OK
+    # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    #
+    #     timeout 15 oci network vnic unassign-private-ip \
+    #         --vnic-id $vnic_id \
+    #         --ip-address $OCF_RESKEY_ip > /run/oci/private_ip_unassign.json 2>/run/oci/private_ip_unassign.err
+    #     if [ $? -eq 0 ] ; then
+    #         \rm -f /run/oci/private_ip_assign.json
+    #         result=$OCF_SUCCESS
+    #         loginfo "oci_privateip: stopped OK: $result, $(cat /run/oci/private_ip_unassign.json), $(cat /run/oci/private_ip_unassign.err)"
+    #     else
+    #         result=$OCF_ERR_GENERIC
+    #         loginfo "oci_privateip: stopped with error: $result, $(cat /run/oci/private_ip_unassign.json), $(cat /run/oci/private_ip_unassign.err)"
+    #     fi
+    # fi
     result=$OCF_SUCCESS
     ;;
 meta-data)
