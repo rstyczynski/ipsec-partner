@@ -28,13 +28,13 @@ EOF
 # enable
 #
 chmod 664 /etc/systemd/system/secondary_vnic_all_configure.service
-systemctl enable /etc/systemd/system/secondary_vnic_all_configure.service
+systemctl enable secondary_vnic_all_configure
 systemctl list-unit-files|egrep secondary_vnic_all_configure.service
 
 #
 # start interfaces
 #
-systemctl start /etc/systemd/system/secondary_vnic_all_configure.service
+systemctl start secondary_vnic_all_configure
 
 echo "Done."
 
