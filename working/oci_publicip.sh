@@ -124,11 +124,11 @@ Reserved public IP address created in OCI.
 <shortdesc lang="en">publicIp</shortdesc>
 </parameter>
 
-<parameter name="vnic_no" unique="0" required="1">
+<parameter name="ocid" unique="0" required="1">
 <longdesc lang="en">
-Number VNIC with private_ip.
+ public_ip ocid 
 </longdesc>
-<shortdesc lang="en">vnic_no</shortdesc>
+<shortdesc lang="en">ocid</shortdesc>
 </parameter>
 
 
