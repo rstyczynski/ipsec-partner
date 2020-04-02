@@ -51,9 +51,13 @@ getOCIresoures
 # start deamons and and at boot time
 #
 systemctl start pcsd
+systemctl start corosync.service
+systemctl start pacemaker.service
+
 systemctl enable pcsd.service
 systemctl enable corosync.service
 systemctl enable pacemaker.service
+
 
 #
 # configure firewall
