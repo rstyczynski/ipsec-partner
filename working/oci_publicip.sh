@@ -39,33 +39,33 @@ function logdebug {
     fi
 }
 
-# function getVNICIp_id() {
-#     vnic_no=$1
+function getVNICIp_id() {
+    vnic_no=$1
 
-#     call_id=private_ip_curl
-#     timeout 5 curl -s -L http://169.254.169.254/opc/v1/vnics/ > /run/oci/$call_id.out 2> /run/oci/$call_id.err
-#     if [ $? -ne 0 ]; then
-#         loginfo "getVNICIp_id: Error. $(cat /run/oci/$call_id.out), $(cat /run/oci/$call_id.err)"
-#         return 1
-#     else
-#         loginfo "getVNICIp_id: OK. $(cat /run/oci/$call_id.out), $(cat /run/oci/$call_id.err)"
-#         vnic_id=$(cat /run/oci/$call_id.out | jq -r .[$vnic_no].vnicId)
-#     fi
+    call_id=private_ip_curl
+    timeout 5 curl -s -L http://169.254.169.254/opc/v1/vnics/ > /run/oci/$call_id.out 2> /run/oci/$call_id.err
+    if [ $? -ne 0 ]; then
+        loginfo "getVNICIp_id: Error. $(cat /run/oci/$call_id.out), $(cat /run/oci/$call_id.err)"
+        return 1
+    else
+        loginfo "getVNICIp_id: OK. $(cat /run/oci/$call_id.out), $(cat /run/oci/$call_id.err)"
+        vnic_id=$(cat /run/oci/$call_id.out | jq -r .[$vnic_no].vnicId)
+        loginfo "getVNICIp_id: $vnic_id"
 
-#     call_id=private_ip_list
-#     timeout 5 oci network private-ip list --vnic-id $vnic_id > /run/oci/$call_id.out 2> /run/oci/$call_id.err
-#     if [ $? -ne 0 ]; then
-#         loginfo "getVNICIp_id: Error. $(cat /run/oci/$call_id.out), $(cat /run/oci/$call_id.err)"
-#         return 1
-#     else
-#         privateIp_id=$(cat /run/oci/$call_id.out | 
-#         sed 's/is-primary/is_primary/g' | 
-#         jq -r '.data[] | select(.is_primary == true) | .id')
-#         loginfo "getVNICIp_id: OK. $(cat /run/oci/$call_id.out), $(cat /run/oci/$call_id.err)"
-#     fi
-
-#     echo $privateIp_id
-# }
+        call_id=private_ip_list
+        timeout 5 oci network private-ip list --vnic-id $vnic_id > /run/oci/$call_id.out 2> /run/oci/$call_id.err
+        if [ $? -ne 0 ]; then
+            loginfo "getVNICIp_id: Error. $(cat /run/oci/$call_id.out), $(cat /run/oci/$call_id.err)"
+            return 1
+        else
+            privateIp_id=$(cat /run/oci/$call_id.out | 
+            sed 's/is-primary/is_primary/g' | 
+            jq -r '.data[] | select(.is_primary == true) | .id')
+            loginfo "getVNICIp_id: OK. $(cat /run/oci/$call_id.out), $(cat /run/oci/$call_id.err)"
+        fi
+    fi
+    echo $privateIp_id
+}
 
 # function getPublicIp_id() {
 #     publicIp_id=$1
@@ -82,7 +82,7 @@ function logdebug {
 
 function hasPublicIp() {
 
-    logdebug "hasPublicIp: public-ip get started"
+    logdebug "hasPublicIp: public-ip get started with $OCF_RESKEY_publicIp"
     timeout 15 oci network public-ip get --public-ip-address $OCF_RESKEY_publicIp > /run/oci/public_ip_get.json 2>/run/oci/public_ip_get.err
     if [ $? -eq 0 ]; then
         logdebug "hasPublicIp: looking for assigned-entity-id..."
@@ -90,7 +90,7 @@ function hasPublicIp() {
         sed 's/assigned-entity-id/assigned_entity_id/g' | 
         jq -r '.data.assigned_entity_id')
         logdebug "hasPublicIp: assigned-entity-id: $assigned_entity_id"
-        if [ "$assigned_entity_id" == "$OCF_RESKEY_privateIP_id" ]; then
+        if [ "$assigned_entity_id" == "$privateIP_id" ]; then
             logdebug "hasPublicIp: OK. Response: $(cat /run/oci/public_ip_get.json), $(cat /run/oci/public_ip_get.err)"
             return 0
         else
@@ -124,26 +124,13 @@ Reserved public IP address created in OCI.
 <shortdesc lang="en">publicIp</shortdesc>
 </parameter>
 
-<parameter name="publicIp_id" unique="0" required="1">
+<parameter name="vnic_no" unique="0" required="1">
 <longdesc lang="en">
-OCID of reserved public IP address.
+Number VNIC with private_ip.
 </longdesc>
-<shortdesc lang="en">publicIp_id</shortdesc>
+<shortdesc lang="en">vnic_no</shortdesc>
 </parameter>
 
-<parameter name="privateIP_id" unique="0" required="1">
-<longdesc lang="en">
-OCID of PrivateIP_id attached to VNIC.
-</longdesc>
-<shortdesc lang="en">privateIP_id</shortdesc>
-</parameter>
-
-<parameter name="privateIP_vnic_no" unique="0" required="1">
-<longdesc lang="en">
-OCID of VNIC with attached PrivateIP.
-</longdesc>
-<shortdesc lang="en">privateIP_vnic_id</shortdesc>
-</parameter>
 
 </parameters>
 
@@ -162,8 +149,13 @@ umask 077
 mkdir -p /run/oci
 
 if [ ! "$action" == "meta-data" ]; then 
-    loginfo "oci_public_ip: Initializing: $action, $OCF_RESKEY_publicIp, 
-    $OCF_RESKEY_publicIp_id, $OCF_RESKEY_privateIP_id, $OCF_RESKEY_privateIP_vnic_id"
+    loginfo "oci_public_ip: Initializing: $action, 
+    $OCF_RESKEY_publicIp, $OCF_RESKEY_publicIp_id, 
+    $OCF_RESKEY_privateIP_vnic_no."
+
+    privateIP_id=$(getVNICIp_id $OCF_RESKEY_privateIP_vnic_no)
+
+    loginfo "oci_public_ip: privateIP_id: $privateIP_id"
 fi
 
 case $action in
@@ -172,10 +164,9 @@ start)
         result=$OCF_SUCCESS
     else
         call_id=rm_start_public_ip_get
-        timeout 5 oci network public-ip update \
+        timeout 5 oci network public-ip update --force \
         --public-ip-id $OCF_RESKEY_publicIp_id \
-        --private-ip-id $OCF_RESKEY_privateIP_id \
-        --force >/run/oci/$call_id.out 2> /run/oci/$call_id.err
+        --private-ip-id $privateIP_id >/run/oci/$call_id.out 2> /run/oci/$call_id.err
         if [ $? -ne 0 ]; then
             loginfo "rm_start: Error. $(cat /run/oci/$call_id.out), $(cat /run/oci/$call_id.err)"
             result=$OCF_ERR_GENERIC
