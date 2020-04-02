@@ -29,13 +29,13 @@ function utc::now() {
 # logging
 function loginfo {
     line_pfx="$(utc::now)"
-    echo "$line_pfx;$1" >> /var/log/oci_privateip.log
+    echo "$line_pfx;$1" >> /var/log/oci_privateip_$OCF_RESKEY_vnic_no.log
 }
 
 function logdebug {
     if [ $DEBUG -eq 1 ];then
         line_pfx="$(utc::now)"
-        echo "$line_pfx;$1" >> /var/log/oci_privateip.log
+        echo "$line_pfx;$1" >> /var/log/oci_privateip_$OCF_RESKEY_vnic_no.log
     fi
 }
 
