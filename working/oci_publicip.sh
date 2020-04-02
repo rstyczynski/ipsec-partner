@@ -124,6 +124,20 @@ Reserved public IP address created in OCI.
 <shortdesc lang="en">publicIp</shortdesc>
 </parameter>
 
+<parameter name="publicIp_id" unique="0" required="1">
+<longdesc lang="en">
+OICD of Reserved public IP address created in OCI.
+</longdesc>
+<shortdesc lang="en">publicIp_id</shortdesc>
+</parameter>
+
+<parameter name="vnic_no" unique="0" required="1">
+<longdesc lang="en">
+ VNIC no on the instance
+</longdesc>
+<shortdesc lang="en">vnic_no</shortdesc>
+</parameter>
+
 <parameter name="ocid" unique="0" required="1">
 <longdesc lang="en">
  public_ip ocid 
