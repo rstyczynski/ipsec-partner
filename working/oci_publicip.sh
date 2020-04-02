@@ -83,38 +83,22 @@ function logdebug {
 function hasPublicIp() {
 
     logdebug "hasPublicIp: public-ip get started"
-    timeout 5 oci network public-ip get --public-ip-address $OCF_RESKEY_publicIp > /run/oci/public_ip_get.json 2>/run/oci/public_ip_get.err
-    result=$?
+    timeout 15 oci network public-ip get --public-ip-address $OCF_RESKEY_publicIp > /run/oci/public_ip_get.json 2>/run/oci/public_ip_get.err
     if [ $result -eq 0 ]; then
-        logdebug "hasPublicIp: looking for entity_type"
-        entity_type=$(cat /run/oci/public_ip_get.json | sed 's/assigned-entity-type/assigned_entity_type/g' | jq -r '.data.assigned_entity_type')
-
-        case $entity_type in
-        PRIVATE_IP)
-            entity_id=$(cat /run/oci/public_ip_get.json | sed 's/assigned-entity-id/assigned_entity_id/g' | jq -r '.data.assigned_entity_id')
-
-            # so here we have private ip OCID
-            if [ "$entity_id" == "$OCF_RESKEY_privateIP_vnic_id" ]; then
-                logdebug "hasPublicIp: OK. Response: $(cat /run/oci/public_ip_get.json), $(cat /run/oci/public_ip_get.err)"
-                return 0
-            else
-                logdebug "hasPublicIp: Assigned to other. Response: $(cat /run/oci/public_ip_get.json), $(cat /run/oci/public_ip_get.err)"
-                return 1
-            fi
-            ;;
-        null)
-            logdebug "hasPublicIp: Not assigned. Response: $(cat /run/oci/public_ip_get.json), $(cat /run/oci/public_ip_get.err)"
+        logdebug "hasPublicIp: looking for assigned-entity-id..."
+        assigned_entity_id=$(cat /run/oci/public_ip_get.json | 
+        sed 's/assigned-entity-id/assigned_entity_id/g' | 
+        jq -r '.data.assigned_entity_id')
+        logdebug "hasPublicIp: assigned-entity-id: $assigned_entity_id"
+        if [ "$assigned_entity_id" == "$OCF_RESKEY_privateIP_id" ]; then
+            logdebug "hasPublicIp: OK. Response: $(cat /run/oci/public_ip_get.json), $(cat /run/oci/public_ip_get.err)"
+            return 0
+        else
+            logdebug "hasPublicIp: Assigned to other. Response: $(cat /run/oci/public_ip_get.json), $(cat /run/oci/public_ip_get.err)"
             return 1
-            ;;
-        *)
-            logdebug "hasPublicIp: Error. Not supported entity_type reported. Response: $(cat /run/oci/public_ip_get.json), $(cat /run/oci/public_ip_get.err)"
-            return 1
-            ;;
-        esac
-        logdebug "hasPublicIp: entity_type processed"
+        fi
     else
-        logdebug "hasPublicIp: General error. Response: $(cat /run/oci/public_ip_get.json), $(cat /run/oci/public_ip_get.err)"
-        return 1
+        logdebug "hasPublicIp: General error: $(cat /run/oci/public_ip_get.json), $(cat /run/oci/public_ip_get.err)"
     fi
 }
 
@@ -154,7 +138,7 @@ OCID of PrivateIP_id attached to VNIC.
 <shortdesc lang="en">privateIP_id</shortdesc>
 </parameter>
 
-<parameter name="privateIP_vnic_id" unique="0" required="1">
+<parameter name="privateIP_vnic_no" unique="0" required="1">
 <longdesc lang="en">
 OCID of VNIC with attached PrivateIP.
 </longdesc>
