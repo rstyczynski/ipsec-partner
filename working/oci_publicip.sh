@@ -138,13 +138,6 @@ OICD of Reserved public IP address created in OCI.
 <shortdesc lang="en">vnic_no</shortdesc>
 </parameter>
 
-<parameter name="ocid" unique="0" required="1">
-<longdesc lang="en">
- public_ip ocid 
-</longdesc>
-<shortdesc lang="en">ocid</shortdesc>
-</parameter>
-
 
 </parameters>
 
