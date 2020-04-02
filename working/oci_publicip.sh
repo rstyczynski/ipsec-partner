@@ -158,9 +158,9 @@ mkdir -p /run/oci
 if [ ! "$action" == "meta-data" ]; then 
     loginfo "oci_public_ip: Initializing: $action, 
     $OCF_RESKEY_publicIp, $OCF_RESKEY_publicIp_id, 
-    $OCF_RESKEY_privateIP_vnic_no."
+    $OCF_RESKEY_vnic_no."
 
-    privateIP_id=$(getVNICIp_id $OCF_RESKEY_privateIP_vnic_no)
+    privateIP_id=$(getVNICIp_id $OCF_RESKEY_vnic_no)
 
     loginfo "oci_public_ip: privateIP_id: $privateIP_id"
 fi

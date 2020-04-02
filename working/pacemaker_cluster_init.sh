@@ -30,9 +30,6 @@ fi
 #
 # configure pacemaker infrastructure
 #
-pcs cluster stop --all
-pcs cluster destroy
-
 pcs cluster auth $cluster_nodes -u hacluster -p "$pass" --force
 
 pcs cluster setup --force --name ipsec_cluster $cluster_nodes

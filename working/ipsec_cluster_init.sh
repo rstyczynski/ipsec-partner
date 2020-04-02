@@ -54,6 +54,17 @@ fi
 #
 
 
+pcs resource delete ipsec_cluster_routing 
+pcs resource create ipsec_cluster_routing  \
+ocf:heartbeat:Route \
+destination=$route_destination \
+device=$route_device \
+gateway=$route_gateway \
+op monitor interval=60s timeout="5s" \
+op start interval="0" timeout="5s" \
+op stop interval="0" timeout="5s"
+
+pcs resource delete ipsec_cluster_private_ip 
 pcs resource create ipsec_cluster_private_ip \
 ocf:heartbeat:oci_privateip \
 ip=$private_ip \
@@ -62,15 +73,17 @@ op monitor interval=60s timeout="30s"  \
 op start interval="0" timeout="30s"  \
 op stop interval="0" timeout="30s"
 
-pcs resource create ipsec_cluster_inet_ip  \
-ocf:heartbeat:IPaddr2 \
-nic=$private_ip_nic \
-ip=$private_ip \
-cidr_netmask=$private_ip_cidr_netmask \
-op monitor interval=30s timeout="5s" \
-op start interval="0" timeout="5s" \
-op stop interval="0" timeout="5s"
+# pcs resource delete ipsec_cluster_inet_ip 
+# pcs resource create ipsec_cluster_inet_ip  \
+# ocf:heartbeat:IPaddr2 \
+# nic=$private_ip_nic \
+# ip=$private_ip \
+# cidr_netmask=$private_ip_cidr_netmask \
+# op monitor interval=30s timeout="5s" \
+# op start interval="0" timeout="5s" \
+# op stop interval="0" timeout="5s"
 
+pcs resource delete ipsec_cluster_public_ip  
 pcs resource create ipsec_cluster_public_ip  \
 ocf:heartbeat:oci_publicip \
 publicIp=$public_ip \
@@ -80,14 +93,6 @@ op monitor interval=60s timeout="30s" \
 op start interval="0" timeout="30s" \
 op stop interval="0" timeout="30s"
 
-pcs resource create ipsec_cluster_routing  \
-ocf:heartbeat:Route \
-destination=$route_destination \
-device=$route_device \
-gateway=$route_gateway \
-op monitor interval=60s timeout="5s" \
-op start interval="0" timeout="5s" \
-op stop interval="0" timeout="5s"
 
 if [ ! "null" == "$libreswan_service" ]; then
     systemctl stop ipsec
@@ -99,19 +104,22 @@ if [ ! "null" == "$libreswan_service" ]; then
 fi
 
 # keep right order of starting resources
-pcs constraint order ipsec_cluster_inet_ip then ipsec_cluster_private_ip
+
+pcs constraint order ipsec_cluster_routing then ipsec_cluster_private_ip 
+
 pcs constraint order ipsec_cluster_private_ip then ipsec_cluster_public_ip
-pcs constraint order ipsec_cluster_public_ip then ipsec_cluster_routing
+
 if [ ! "null" == "$libreswan_service" ]; then 
-    pcs constraint order ipsec_cluster_routing then ipsec_cluster_libreswan
+   pcs constraint order ipsec_cluster_public_ip then ipsec_cluster_libreswan
 fi
 
 # keep resources together
-pcs constraint colocation add ipsec_cluster_private_ip with ipsec_cluster_inet_ip score=INFINITY
-pcs constraint colocation add ipsec_cluster_inet_ip with ipsec_cluster_public_ip score=INFINITY
-pcs constraint colocation add ipsec_cluster_public_ip with ipsec_cluster_routing score=INFINITY
+pcs constraint colocation add ipsec_cluster_routing with ipsec_cluster_private_ip  score=INFINITY
+
+pcs constraint colocation add ipsec_cluster_private_ip with ipsec_cluster_public_ip  score=INFINITY
+
 if [ ! "null" == "$libreswan_service" ]; then 
-    pcs constraint colocation add ipsec_cluster_routing with ipsec_cluster_libreswan score=INFINITY
+    pcs constraint colocation add ipsec_cluster_public_ip with ipsec_cluster_libreswan score=INFINITY
 fi
 
 #
