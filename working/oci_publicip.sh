@@ -84,7 +84,7 @@ function hasPublicIp() {
 
     logdebug "hasPublicIp: public-ip get started"
     timeout 15 oci network public-ip get --public-ip-address $OCF_RESKEY_publicIp > /run/oci/public_ip_get.json 2>/run/oci/public_ip_get.err
-    if [ $result -eq 0 ]; then
+    if [ $? -eq 0 ]; then
         logdebug "hasPublicIp: looking for assigned-entity-id..."
         assigned_entity_id=$(cat /run/oci/public_ip_get.json | 
         sed 's/assigned-entity-id/assigned_entity_id/g' | 
