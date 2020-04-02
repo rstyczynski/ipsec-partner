@@ -21,6 +21,10 @@ function y2j {
 cluster_nodes=$(cat $cluster_config | y2j | jq -r .ipsec_partner.cluster.nodes[])
 pass=$(cat $cluster_config | y2j | jq -r .ipsec_partner.cluster.pass)
 
+public_ip=$(cat $cluster_config | y2j | jq -r .ipsec_partner.public.ip)
+public_ip_vnic_no=$(cat $cluster_config | y2j | jq -r .ipsec_partner.public.vnic_no)
+public_ip_oicd=$(cat $cluster_config | y2j | jq -r .ipsec_partner.public.oicd)
+
 private_ip1=$(cat $cluster_config | y2j | jq -r .ipsec_partner.private[0].ip)
 private_ip1_cidr_netmask=$(cat $cluster_config | y2j | jq -r .ipsec_partner.private[0].cidr_netmask)
 private_ip1_nic=$(cat $cluster_config | y2j | jq -r .ipsec_partner.private[0].nic)
@@ -30,9 +34,6 @@ private_ip2=$(cat $cluster_config | y2j | jq -r .ipsec_partner.private[1].ip)
 private_ip2_cidr_netmask=$(cat $cluster_config | y2j | jq -r .ipsec_partner.private[1].cidr_netmask)
 private_ip2_nic=$(cat $cluster_config | y2j | jq -r .ipsec_partner.private[1].nic)
 private_ip2_vnic_no=$(cat $cluster_config | y2j | jq -r .ipsec_partner.private[1].vnic_no)
-
-public_ip=$(cat $cluster_config | y2j | jq -r .ipsec_partner.public.ip)
-public_ip_vnic_no=$(cat $cluster_config | y2j | jq -r .ipsec_partner.public.vnic_no)
 
 route_destination=$(cat $cluster_config | y2j | jq -r .ipsec_partner.route.destination)
 route_device=$(cat $cluster_config | y2j | jq -r .ipsec_partner.route.device)
@@ -99,6 +100,7 @@ pcs resource create ipsec_cluster_public_ip  \
 ocf:heartbeat:oci_publicip \
 publicIp=$public_ip \
 vnic_no=$public_ip_vnic_no \
+oicd=$public_ip_oicd \
 op monitor interval=60s timeout="30s" \
 op start interval="0" timeout="30s" \
 op stop interval="0" timeout="30s"
