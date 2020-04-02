@@ -34,7 +34,7 @@ systemctl list-unit-files|egrep secondary_vnic_all_configure.service
 #
 # start interfaces
 #
-systemctl start secondary_vnic_all_configure
+#systemctl start secondary_vnic_all_configure
 
 echo "Done."
 
