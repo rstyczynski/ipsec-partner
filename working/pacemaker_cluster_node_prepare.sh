@@ -16,7 +16,7 @@ function y2j {
 #
 # get parameters
 #
-pass=$(cat $cluster_config | y2j | jq -r .ipsec_partner.cluster.pass)
+pass=$(cat $cluster_config | y2j | jq -r .ipsec_partner.cluster.pass)XX
 
 #
 # check if root
@@ -46,19 +46,6 @@ function getOCIresoures() {
 }
 getOCIresoures
 
-
-#
-# start deamons and and at boot time
-#
-systemctl start pcsd
-systemctl start corosync.service
-systemctl start pacemaker.service
-
-systemctl enable pcsd.service
-systemctl enable corosync.service
-systemctl enable pacemaker.service
-
-
 #
 # configure firewall
 #
@@ -68,7 +55,7 @@ firewall-cmd --add-service=high-availability
 #
 # specify password for cluster user
 #
-bash -c "echo $pass | passwd --stdin hacluster"
+bash -c "echo \"$pass\" | passwd --stdin hacluster"
 
 #
 # stop ipsec for boot time and now
