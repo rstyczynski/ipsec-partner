@@ -105,21 +105,21 @@ fi
 
 # keep right order of starting resources
 
-pcs constraint order ipsec_cluster_routing then ipsec_cluster_private_ip 
+pcs constraint order ipsec_cluster_routing then ipsec_cluster_private_ip  --force
 
-pcs constraint order ipsec_cluster_private_ip then ipsec_cluster_public_ip
+pcs constraint order ipsec_cluster_private_ip then ipsec_cluster_public_ip --force
 
 if [ ! "null" == "$libreswan_service" ]; then 
-   pcs constraint order ipsec_cluster_public_ip then ipsec_cluster_libreswan
+   pcs constraint order ipsec_cluster_public_ip then ipsec_cluster_libreswan --force
 fi
 
 # keep resources together
-pcs constraint colocation add ipsec_cluster_routing with ipsec_cluster_private_ip  score=INFINITY
+pcs constraint colocation add ipsec_cluster_routing with ipsec_cluster_private_ip  score=INFINITY --force
 
-pcs constraint colocation add ipsec_cluster_private_ip with ipsec_cluster_public_ip  score=INFINITY
+pcs constraint colocation add ipsec_cluster_private_ip with ipsec_cluster_public_ip  score=INFINITY --force
 
 if [ ! "null" == "$libreswan_service" ]; then 
-    pcs constraint colocation add ipsec_cluster_public_ip with ipsec_cluster_libreswan score=INFINITY
+    pcs constraint colocation add ipsec_cluster_public_ip with ipsec_cluster_libreswan score=INFINITY --force
 fi
 
 #
