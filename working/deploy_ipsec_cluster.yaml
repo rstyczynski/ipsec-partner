@@ -41,9 +41,9 @@
     #
     # register secondary vnic cfg servcie
     #
-    - name: register secondary vnic cfg servcie
-      become: yes
-      script: register_secondary_vnic_unit.sh
+    # - name: register secondary vnic cfg servcie
+    #   become: yes
+    #   script: register_secondary_vnic_unit.sh
 
     #
     # prepare cluster nodes
