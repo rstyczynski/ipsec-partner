@@ -10,42 +10,47 @@ source $HOME/.bash_profile
 
 function usage() {
     echo -n "Usage: $(basename $0) "
-    cat $0 | grep -v '/# parameters - start/,/# parameters - stop/p' | 
-    sed -n '/# parameters - start/,/# parameters - stop/p' | 
-    grep '\--' | cut -f1 -d ')' | tr -s ' ' | tr '\n' ' '
+    cat $0 | grep -v '/# parameters - start/,/# parameters - stop/p' |
+        sed -n '/# parameters - start/,/# parameters - stop/p' |
+        grep '\--' | cut -f1 -d ')' | tr -s ' ' | tr '\n' ' '
     echo
 
     echo
     echo "Mandatory parameters: "
-    cat $0 | grep -v '/# mandatory parameters - start/,/# mandatory parameters - stop/p' | 
-    sed -n '/# mandatory parameters - start/,/# mandatory parameters - stop/p' | 
-    grep '\[ -z'  | sed 's/|/;/g' | cut -f2 -d ';' | sed 's/"$//g' | nl
+    cat $0 | grep -v '/# mandatory parameters - start/,/# mandatory parameters - stop/p' |
+        sed -n '/# mandatory parameters - start/,/# mandatory parameters - stop/p' |
+        grep '\[ -z' | sed 's/|/;/g' | cut -f2 -d ';' | sed 's/"$//g' | nl
     echo
 
     echo
     echo "Parameter defaults: "
-    cat $0 | grep -v '/# parameters defaults - start/,/# parameters defaults - stop/p' | 
-    sed -n '/# parameters defaults - start/,/# parameters defaults - stop/p' | 
-    grep '\[ -z' | sed 's/&& /;/g' | cut -f2 -d ';' | nl
+    cat $0 | grep -v '/# parameters defaults - start/,/# parameters defaults - stop/p' |
+        sed -n '/# parameters defaults - start/,/# parameters defaults - stop/p' |
+        grep '\[ -z' | sed 's/&& /;/g' | cut -f2 -d ';' | nl
     echo
 }
 
 # parameters - start
-while [ $# -gt 0 ]; do opt="$1"; shift
+while [ $# -gt 0 ]; do
+    opt="$1"
+    shift
     case $opt in
-        --ipsec-name) ipsec_name=$1 ;;
-        --ipsec-id) ipsec_id=$1 ;;
-        --tunnels) tunnels=$1 ;;
-        --time_up) time_up=$1 ;;
-        --time_down) time_down=$1 ;;
-        --interval) interval=$1 ;;
-        --timeout) oci_timeout=$1 ;;
-        --tmp) tmpdirbase=$1 ;;
-        --log) log=$1 ;;
-        --debug) loginfo_trace_stdout=$1 ;;
-        --compartment-id) compartment_id=$1 ;;
-        --telemetry-endpoint) telemetry_endpoint=$1 ;;
-        -h|--help)  usage; exit ;;
+    --ipsec-name) ipsec_name=$1 ;;
+    --ipsec-id) ipsec_id=$1 ;;
+    --tunnels) tunnels=$1 ;;
+    --time_up) time_up=$1 ;;
+    --time_down) time_down=$1 ;;
+    --interval) interval=$1 ;;
+    --timeout) oci_timeout=$1 ;;
+    --tmp) tmpdirbase=$1 ;;
+    --log) log=$1 ;;
+    --debug) loginfo_trace_stdout=$1 ;;
+    --compartment-id) compartment_id=$1 ;;
+    --telemetry-endpoint) telemetry_endpoint=$1 ;;
+    -h | --help)
+        usage
+        exit
+        ;;
     esac
     shift
 done
@@ -76,7 +81,7 @@ if [ "$error" != "" ]; then
     echo -n "Error. Mandatory arguments missing:"
     echo "$error" | tr '|' '\n' | nl
     echo '!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!'
-    echo 
+    echo
     usage
     exit 1
 fi
@@ -88,7 +93,8 @@ fi
 
 # tmp
 trap stop INT
-tmp=$tmpdirbase/$$/$RANDOM; mkdir -p $tmp
+tmp=$tmpdirbase/$$/$RANDOM
+mkdir -p $tmp
 function stop() {
     \rm $tmp/*
     \rm -rf $tmpdirbase/$$
@@ -103,10 +109,12 @@ function utc::now() {
 # store stdout stderr to log file
 function configureLog() {
 
-    while [ $# -gt 0 ]; do opt="$1"; shift
+    while [ $# -gt 0 ]; do
+        opt="$1"
+        shift
         case $opt in
-            --log_add_date)  log_add_date=$1 ;;
-            --log_suffix) log_suffix=$1 ;;
+        --log_add_date) log_add_date=$1 ;;
+        --log_suffix) log_suffix=$1 ;;
         esac
         shift
     done
@@ -119,7 +127,7 @@ function configureLog() {
         [ -d $log ] || mkdir -p $log 2>/dev/null
         touch $log/touch 2>/dev/null
         if [ $? -ne 0 ]; then
-            echo -n >&2 "Log directory not available. Trying current directory..."
+            echo -n "Log directory not available. Trying current directory..." >&2
             log="./log"
         else
             \rm $log/touch
@@ -136,7 +144,7 @@ function configureLog() {
     if [ ! $log_suffix == NO ]; then
         logfile=${logfile}-$log_suffix
     fi
-        
+
     if [ $log_add_date == YES ]; then
         date_str=$(utc::now)
         logfile=${logfile}-$date_str
@@ -150,7 +158,7 @@ function configureLog() {
 }
 
 # logging
-function loginfo {
+function loginfo() {
 
     line_pfx="$(utc::now)"
 
@@ -177,12 +185,12 @@ function loginfo {
     fi
 }
 
-# 
-function assert_utilities {
+#
+function assert_utilities() {
     required_cmd=$1
 
     cmd_missing=''
-    for cmd in $required_cmd; do 
+    for cmd in $required_cmd; do
         hash $cmd 2>/dev/null
         if [ $? -ne 0 ]; then
             cmd_missing="$cmd_missing $cmd"
@@ -190,24 +198,32 @@ function assert_utilities {
     done
 
     if [ "$cmd_missing" != "" ]; then
-        loginfo error "Error. Required utilities not available. Check PATH or install packages. Not reachable utilities: $cmd_missing" 
-        
+        loginfo error "Error. Required utilities not available. Check PATH or install packages. Not reachable utilities: $cmd_missing"
+
         exit 2
     fi
 }
 
+
+function getInt() {
+    if [ -z "$1" ]; then
+        echo 0
+    else
+        echo $1
+    fi
+}
 #
-function oci_metric {
+function oci_metric() {
 
     if [ "$1" == "set_file" ]; then
         oci_json_file=$2
-        echo -n > $oci_json_file
+        echo -n >$oci_json_file
         return
     fi
 
     if [ "$1" == "start_array" ]; then
         oci_json_array_started=YES
-        echo '[' >> $oci_json_file
+        echo '[' >>$oci_json_file
         return
     fi
 
@@ -217,7 +233,7 @@ function oci_metric {
     metric_more=$4
 
     if [ "$#" -ne 4 ]; then
-        loginfo error "Error. oci_metric gets 4 mandatory parameters. Provided: $#"
+        loginfo error "Error. oci_metric gets 4 mandatory parameters. Provided: $#: $1 $2 $3 $4"
     fi
 
     if [ -z $oci_json_file ]; then
@@ -225,14 +241,13 @@ function oci_metric {
         return
     fi
 
-
     cat >>$oci_json_file <<EOF
         {
                 "namespace": "custom_ipsec",
                 "compartmentId": "$compartment_id",
                 "name": "$metric_name",
 EOF
-    
+
     if [ "$metric_name" == "tunnel_status" ]; then
         cat >>$oci_json_file <<EOF
                 "dimensions": { "tunnel_name": "${ipsec_name}" },
@@ -258,12 +273,11 @@ EOF
         echo ', ' >>$oci_json_file
     else
         if [ "$oci_json_array_started" == "YES" ]; then
-            echo ']' >> $oci_json_file
+            echo ']' >>$oci_json_file
             unset oci_json_array_started
         fi
     fi
 }
-
 
 #
 # prepare
@@ -278,7 +292,6 @@ assert_utilities "timeout date touch cat tr oci resource_state_filter.py"
 
 # check tunnel status
 # ipsec channel is up when file with data is visible. Otherwise line is down.
-
 updown='downup,updown,upup/downdown'
 [ -f $tmp/ipsec_partner_status ] && \rm $tmp/ipsec_partner_status
 for tunnel in $(seq 1 $tunnels); do
@@ -289,17 +302,17 @@ for tunnel in $(seq 1 $tunnels); do
     fi
 done
 
-# log 
+# log
 loginfo "Tunnels status: $(cat $tmp/ipsec_partner_status)"
 
 # process tunnel state
 [ ! -d /run/ipsec-partner/db ] && mkdir /run/ipsec-partner/db
 
 cat $tmp/ipsec_partner_status |
-resource_state_filter.py \
--r "$ipsec_name" -c "$updown" -d "$time_down" -u "$time_up" -p "/run/ipsec-partner/db" >$tmp/ipsec_partner_tunnels_status
+    resource_state_filter.py \
+        -r "$ipsec_name" -c "$updown" -d "$time_down" -u "$time_up" -p "/run/ipsec-partner/db" >$tmp/ipsec_partner_tunnels_status
 
-# log 
+# log
 loginfo trace "$(cat $tmp/ipsec_partner_tunnels_status | jq -c '.')"
 
 # get numeric value of current state
@@ -337,69 +350,80 @@ for tunnel in $(seq 1 $tunnels); do
     # ipsec channel interface counters
     #
     if [ -f /run/ipsec-partner/status/ip/tunnel/tunnel ]; then
-        if_name=vti$(( $ipsec_id + $tunnel))
+        if_name=vti$(($ipsec_id + $tunnel))
 
-        eval $(cat /run/ipsec-partner/status/ip/tunnel/tunnel | jq -c ".${if_name}.TX"  | 
-        # {"Errors":285,"NoBufs":0,"Packets":4611915,"NoRoute":0,"Bytes":5493003169,"DeadLoop":0}
-        sed 's/":/=/g' | 
-        # {"Errors=285,"NoBufs=0,"Packets=4611915,"NoRoute=0,"Bytes=5493003169,"DeadLoop=0}
-        sed 's/,"/;/g' |
-        # {"Errors=285;NoBufs=0;Packets=4611915;NoRoute=0;Bytes=5493003169;DeadLoop=0} 
-        sed 's/[{},"]//g' | 
-        # Errors=285;NoBufs=0;Packets=4611915;NoRoute=0;Bytes=5493003169;DeadLoop=0
-        tr ';' '\n' | 
-        sed 's/^/TX_/g') # prefix with TX
+        tx_data=$(cat /run/ipsec-partner/status/ip/tunnel/tunnel | jq -c ".${if_name}.TX")
+        if [ ! -z "$tx_data" ]; then
+            loginfo "TX data: >$tx_data<"
+            eval $(echo $tx_data  |
+                # {"Errors":285,"NoBufs":0,"Packets":4611915,"NoRoute":0,"Bytes":5493003169,"DeadLoop":0}
+                sed 's/":/=/g' |
+                # {"Errors=285,"NoBufs=0,"Packets=4611915,"NoRoute=0,"Bytes=5493003169,"DeadLoop=0}
+                sed 's/,"/;/g' |
+                # {"Errors=285;NoBufs=0;Packets=4611915;NoRoute=0;Bytes=5493003169;DeadLoop=0}
+                sed 's/[{},"]//g' |
+                # Errors=285;NoBufs=0;Packets=4611915;NoRoute=0;Bytes=5493003169;DeadLoop=0
+                tr ';' '\n' |
+                sed 's/^/TX_/g') # prefix with TX
 
-        oci_metric TX_Packets $TX_Packets packet expect_more
-        oci_metric TX_Bytes $TX_Bytes Byte expect_more 
-        oci_metric TX_Errors $TX_Errors occurance expect_more
-        oci_metric TX_DeadLoop $TX_DeadLoop occurance expect_more
-        oci_metric TX_NoRoute $TX_NoRoute occurance expect_more
-        oci_metric TX_NoBufs $TX_NoBufs occurance expect_more
+            oci_metric TX_Packets $(getInt $TX_Packets) packet expect_more
+            oci_metric TX_Bytes $(getInt $TX_Bytes) Byte expect_more
+            oci_metric TX_Errors $(getInt $TX_Errors) occurance expect_more
+            oci_metric TX_DeadLoop $(getInt $TX_DeadLoop) occurance expect_more
+            oci_metric TX_NoRoute $(getInt $TX_NoRoute) occurance expect_more
+            oci_metric TX_NoBufs $(getInt $TX_NoBufs) occurance expect_more
 
-        unset TX_Packets TX_Bytes TX_Errors TX_DeadLoop TX_NoRoute TX_NoBufs
+            unset TX_Packets TX_Bytes TX_Errors TX_DeadLoop TX_NoRoute TX_NoBufs
 
-        eval $(cat /run/ipsec-partner/status/ip/tunnel/tunnel | jq -c ".${if_name}.RX"  | 
-        # {"Errors":0,"CsumErrs":0,"Packets":5861329,"Bytes":5571272152,"Mcasts":0,"OutOfSeq":0}
-        sed 's/":/=/g' | 
-        sed 's/,"/;/g' |
-        sed 's/[{},"]//g' | 
-        tr ';' '\n' | 
-        sed 's/^/RX_/g') # prefix with RX
-
-        oci_metric RX_Packets $RX_Packets packet expect_more 
-        oci_metric RX_Bytes $RX_Bytes Byte expect_more 
-        oci_metric RX_Errors $RX_Errors occurance expect_more
-        oci_metric RX_CsumErrs $RX_CsumErrs occurance expect_more 
-        oci_metric RX_OutOfSeq $RX_OutOfSeq occurance expect_more
-
-        if [ $tunnel -lt $tunnels ]; then
-            oci_metric RX_Mcasts $RX_Mcasts occurance expect_more
-        else
-            oci_metric RX_Mcasts $RX_Mcasts occurance no_more
         fi
 
-        unset RX_Packets RX_Bytes RX_Errors RX_CsumErrs RX_OutOfSeq RX_Mcasts
+        rx_data=$(cat /run/ipsec-partner/status/ip/tunnel/tunnel | jq -c ".${if_name}.RX")
+        if [ ! -z "$rx_data" ]; then
+            loginfo "RX data: >$rx_data<"
+            eval $(echo $rx_data |
+                # {"Errors":0,"CsumErrs":0,"Packets":5861329,"Bytes":5571272152,"Mcasts":0,"OutOfSeq":0}
+                sed 's/":/=/g' |
+                sed 's/,"/;/g' |
+                sed 's/[{},"]//g' |
+                tr ';' '\n' |
+                sed 's/^/RX_/g') # prefix with RX
+
+            oci_metric RX_Packets $(getInt $RX_Packets) packet expect_more
+            oci_metric RX_Bytes $(getInt $RX_Bytes) Byte expect_more
+            oci_metric RX_Errors $(getInt $RX_Errors) occurance expect_more
+            oci_metric RX_CsumErrs $(getInt $RX_CsumErrs) occurance expect_more
+            oci_metric RX_OutOfSeq $(getInt $RX_OutOfSeq) occurance expect_more
+
+            unset RX_Packets RX_Bytes RX_Errors RX_CsumErrs RX_OutOfSeq RX_Mcasts
+
+        fi
+
+        if [ $tunnel -lt $tunnels ]; then
+            oci_metric RX_Mcasts $(getInt $RX_Mcasts) occurance expect_more
+        else
+            oci_metric RX_Mcasts $(getInt $RX_Mcasts) occurance no_more
+        fi
+
+        # log
+        loginfo trace "OCI request: $(cat $oci_json_file | jq -c '.')"
+
+        # post data to OCI telemetry
+        timeout $oci_timeout oci monitoring metric-data post --metric-data file://$oci_json_file \
+            --endpoint $telemetry_endpoint | jq -c '.' >$tmp/metric_post_status.json
+        if [ ${PIPESTATUS[0]} -ne 0 ]; then
+            loginfo error "Error. Posting data to OCI failed."
+        else
+            loginfo "Reported to OCI telemetry."
+        fi
+
+        # log
+        loginfo trace "OCI response: $(cat $tmp/metric_post_status.json)"
+
     else
+
         loginfo error "Warning. Tunnel data file not found. Expected /run/ipsec-partner/status/ip/tunnel/tunnel "
     fi
 done
-
-
-# log 
-loginfo trace "OCI request: $(cat $oci_json_file | jq -c '.')"
-
-# post data to OCI telemetry
-timeout $oci_timeout oci monitoring metric-data post --metric-data file://$oci_json_file  \
---endpoint $telemetry_endpoint |  jq -c '.' >$tmp/metric_post_status.json 
-if [ ${PIPESTATUS[0]} -ne 0 ]; then
-    loginfo error "Error. Posting data to OCI failed."
-else
-    loginfo "Reported to OCI telemetry."
-fi
-
-# log 
-loginfo trace "OCI response: $(cat $tmp/metric_post_status.json )"
 
 # exit
 stop
