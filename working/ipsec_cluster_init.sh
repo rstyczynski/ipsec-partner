@@ -25,10 +25,15 @@ public_ip=$(cat $cluster_config | y2j | jq -r .ipsec_partner.public.ip)
 public_ip_vnic_no=$(cat $cluster_config | y2j | jq -r .ipsec_partner.public.vnic_no)
 public_ip_oicd=$(cat $cluster_config | y2j | jq -r .ipsec_partner.public.oicd)
 
-private_ip=$(cat $cluster_config | y2j | jq -r .ipsec_partner.private[0].ip)
-private_ip_cidr_netmask=$(cat $cluster_config | y2j | jq -r .ipsec_partner.private[0].cidr_netmask)
-private_ip_nic=$(cat $cluster_config | y2j | jq -r .ipsec_partner.private[0].nic)
-private_ip_vnic_no=$(cat $cluster_config | y2j | jq -r .ipsec_partner.private[0].vnic_no)
+private_ip1=$(cat $cluster_config | y2j | jq -r .ipsec_partner.private[0].ip)
+private_ip1_cidr_netmask=$(cat $cluster_config | y2j | jq -r .ipsec_partner.private[0].cidr_netmask)
+private_ip1_nic=$(cat $cluster_config | y2j | jq -r .ipsec_partner.private[0].nic)
+private_ip1_vnic_no=$(cat $cluster_config | y2j | jq -r .ipsec_partner.private[0].vnic_no)
+
+private_ip2=$(cat $cluster_config | y2j | jq -r .ipsec_partner.private[1].ip)
+private_ip2_cidr_netmask=$(cat $cluster_config | y2j | jq -r .ipsec_partner.private[1].cidr_netmask)
+private_ip2_nic=$(cat $cluster_config | y2j | jq -r .ipsec_partner.private[1].nic)
+private_ip2_vnic_no=$(cat $cluster_config | y2j | jq -r .ipsec_partner.private[1].vnic_no)
 
 route_destination=$(cat $cluster_config | y2j | jq -r .ipsec_partner.route.destination)
 route_device=$(cat $cluster_config | y2j | jq -r .ipsec_partner.route.device)
@@ -64,11 +69,20 @@ fi
 # op start interval="0" timeout="5s" \
 # op stop interval="0" timeout="5s"
 
-pcs resource delete ipsec_cluster_private_ip 
-pcs resource create ipsec_cluster_private_ip \
+pcs resource delete ipsec_cluster_private_ip_proj 
+pcs resource create ipsec_cluster_private_ip_proj \
 ocf:heartbeat:oci_privateip \
-ip=$private_ip \
-vnic_no=$private_ip_vnic_no \
+ip=$private_ip2 \
+vnic_no=$private_ip2_vnic_no \
+op monitor interval=60s timeout="30s"  \
+op start interval="0" timeout="30s"  \
+op stop interval="0" timeout="30s"
+
+pcs resource delete ipsec_cluster_private_ip_prod 
+pcs resource create ipsec_cluster_private_ip_prod \
+ocf:heartbeat:oci_privateip \
+ip=$private_ip1 \
+vnic_no=$private_ip1_vnic_no \
 op monitor interval=60s timeout="30s"  \
 op start interval="0" timeout="30s"  \
 op stop interval="0" timeout="30s"

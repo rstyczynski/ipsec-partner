@@ -212,6 +212,7 @@ stop)
     #     fi
     # fi
     result=$OCF_SUCCESS
+    loginfo "oci_privateip: Stop OK"
     ;;
 meta-data)
     meta_data
@@ -222,8 +223,10 @@ status | monitor)
     # http://www.linux-ha.org/doc/dev-guides/_api_definitions.html#_environment_variables
     if hasPrivateIp $OCF_RESKEY_ip $vnic_id; then
         result=$OCF_SUCCESS
+        loginfo "oci_privateip: monitor OK"
     else
         result=$OCF_NOT_RUNNING
+        loginfo "oci_privateip: monitor NOT RUNNING"
     fi
     ;;
 *)
