@@ -54,15 +54,15 @@ fi
 #
 
 
-pcs resource delete ipsec_cluster_routing 
-pcs resource create ipsec_cluster_routing  \
-ocf:heartbeat:Route \
-destination=$route_destination \
-device=$route_device \
-gateway=$route_gateway \
-op monitor interval=60s timeout="5s" \
-op start interval="0" timeout="5s" \
-op stop interval="0" timeout="5s"
+# pcs resource delete ipsec_cluster_routing 
+# pcs resource create ipsec_cluster_routing  \
+# ocf:heartbeat:Route \
+# destination=$route_destination \
+# device=$route_device \
+# gateway=$route_gateway \
+# op monitor interval=60s timeout="5s" \
+# op start interval="0" timeout="5s" \
+# op stop interval="0" timeout="5s"
 
 pcs resource delete ipsec_cluster_private_ip 
 pcs resource create ipsec_cluster_private_ip \
@@ -105,8 +105,6 @@ fi
 
 # keep right order of starting resources
 
-pcs constraint order ipsec_cluster_routing then ipsec_cluster_private_ip  --force
-
 pcs constraint order ipsec_cluster_private_ip then ipsec_cluster_public_ip --force
 
 if [ ! "null" == "$libreswan_service" ]; then 
@@ -114,7 +112,6 @@ if [ ! "null" == "$libreswan_service" ]; then
 fi
 
 # keep resources together
-pcs constraint colocation add ipsec_cluster_routing with ipsec_cluster_private_ip  score=INFINITY --force
 
 pcs constraint colocation add ipsec_cluster_private_ip with ipsec_cluster_public_ip  score=INFINITY --force
 

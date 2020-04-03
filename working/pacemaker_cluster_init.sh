@@ -35,6 +35,7 @@ pcs cluster auth $cluster_nodes -u hacluster -p "$pass" --force
 pcs cluster setup --force --name ipsec_cluster $cluster_nodes
 pcs cluster start --all
 
+### run on each node!!!
 pcs property set stonith-enabled=false
 pcs property set no-quorum-policy=ignore
 pcs resource defaults resource-stickiness=100

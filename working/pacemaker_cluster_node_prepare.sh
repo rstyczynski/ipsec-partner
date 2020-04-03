@@ -29,7 +29,7 @@ fi
 #
 # install required software
 #
-yum install -y pacemaker pcs resource-agents git jq
+yum install -y pacemaker pcs resource-agents git jq libreswan
 
 function getOCIresoures() {
     if [ ! -d ipsec-partner ]; then
@@ -51,6 +51,12 @@ getOCIresoures
 #
 firewall-cmd --permanent --add-service=high-availability
 firewall-cmd --add-service=high-availability
+
+#
+# start deamon
+#
+systemctl start pcsd.service
+systemctl enable pcsd.service
 
 #
 # specify password for cluster user

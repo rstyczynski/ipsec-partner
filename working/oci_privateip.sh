@@ -164,6 +164,8 @@ if [ ! "$action" == "meta-data" ]; then
     loginfo "oci_privateip: Initialized for: $OCF_RESKEY_ip on $vnic_id"
 fi
 
+echo $OCF_RESKEY_ip >/run/oci/private_ip.text
+
 case $action in
 
 start)
