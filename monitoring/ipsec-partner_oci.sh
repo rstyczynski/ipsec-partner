@@ -1,5 +1,7 @@
 #!/bin/bash
 
+#set -x
+
 # set ipsec-partner environment, including Oracle OCI client libraries
 PATH=$PATH:/opt/ipsec-partner/sbin:/opt/ipsec-partner/bin
 source $HOME/.bash_profile
@@ -204,7 +206,6 @@ function assert_utilities() {
     fi
 }
 
-
 function getInt() {
     if [ -z "$1" ]; then
         echo 0
@@ -337,25 +338,27 @@ oci_metric start_array
 # tunnel smoothed status
 oci_metric tunnel_status $state_numeric level expect_more
 
-for tunnel in $(seq 1 $tunnels); do
+# ipsec channel interface counters
+#
+if [ -f /run/ipsec-partner/status/ip/tunnel/tunnel ]; then
 
-    # ipsec channel up/down
-    #
-    if [ -f /run/ipsec-partner/status/ipsec/whack/${ipsec_name}_tunnel$tunnel ]; then
-        oci_metric ipsec_status 100 level expect_more
-    else
-        oci_metric ipsec_status 0 level expect_more
-    fi
+    for tunnel in $(seq 1 $tunnels); do
 
-    # ipsec channel interface counters
-    #
-    if [ -f /run/ipsec-partner/status/ip/tunnel/tunnel ]; then
+        # ipsec channel up/down
+        #
+        if [ -f /run/ipsec-partner/status/ipsec/whack/${ipsec_name}_tunnel$tunnel ]; then
+            oci_metric ipsec_status 100 level expect_more
+        else
+            oci_metric ipsec_status 0 level expect_more
+        fi
+
         if_name=vti$(($ipsec_id + $tunnel))
 
-        tx_data=$(cat /run/ipsec-partner/status/ip/tunnel/tunnel | jq -c ".${if_name}.TX")
-        if [ ! -z "$tx_data" ]; then
+        #jq adds new line! 
+        tx_data=$(cat /run/ipsec-partner/status/ip/tunnel/tunnel | jq -cj ".${if_name}.TX"  | tr -cd '[:print:]')
+        if [ "$tx_data" != "null" ]; then
             loginfo "TX data: >$tx_data<"
-            eval $(echo $tx_data  |
+            eval $(echo $tx_data |
                 # {"Errors":285,"NoBufs":0,"Packets":4611915,"NoRoute":0,"Bytes":5493003169,"DeadLoop":0}
                 sed 's/":/=/g' |
                 # {"Errors=285,"NoBufs=0,"Packets=4611915,"NoRoute=0,"Bytes=5493003169,"DeadLoop=0}
@@ -377,8 +380,8 @@ for tunnel in $(seq 1 $tunnels); do
 
         fi
 
-        rx_data=$(cat /run/ipsec-partner/status/ip/tunnel/tunnel | jq -c ".${if_name}.RX")
-        if [ ! -z "$rx_data" ]; then
+        rx_data=$(cat /run/ipsec-partner/status/ip/tunnel/tunnel | jq -cj ".${if_name}.RX" |  tr -cd '[:print:]')
+        if [ "$rx_data" != "null" ]; then
             loginfo "RX data: >$rx_data<"
             eval $(echo $rx_data |
                 # {"Errors":0,"CsumErrs":0,"Packets":5861329,"Bytes":5571272152,"Mcasts":0,"OutOfSeq":0}
@@ -404,26 +407,27 @@ for tunnel in $(seq 1 $tunnels); do
             oci_metric RX_Mcasts $(getInt $RX_Mcasts) occurance no_more
         fi
 
-        # log
-        loginfo trace "OCI request: $(cat $oci_json_file | jq -c '.')"
+    done
 
-        # post data to OCI telemetry
-        timeout $oci_timeout oci monitoring metric-data post --metric-data file://$oci_json_file \
-            --endpoint $telemetry_endpoint | jq -c '.' >$tmp/metric_post_status.json
-        if [ ${PIPESTATUS[0]} -ne 0 ]; then
-            loginfo error "Error. Posting data to OCI failed."
-        else
-            loginfo "Reported to OCI telemetry."
-        fi
+    # log
+    loginfo trace "OCI request: $(cat $oci_json_file | jq -c '.')"
 
-        # log
-        loginfo trace "OCI response: $(cat $tmp/metric_post_status.json)"
-
+    # post data to OCI telemetry
+    timeout $oci_timeout oci monitoring metric-data post --metric-data file://$oci_json_file \
+        --endpoint $telemetry_endpoint | jq -c '.' >$tmp/metric_post_status.json
+    if [ ${PIPESTATUS[0]} -ne 0 ]; then
+        loginfo error "Error. Posting data to OCI failed."
     else
-
-        loginfo error "Warning. Tunnel data file not found. Expected /run/ipsec-partner/status/ip/tunnel/tunnel "
+        loginfo "Reported to OCI telemetry."
     fi
-done
+
+    # log
+    loginfo trace "OCI response: $(cat $tmp/metric_post_status.json)"
+
+else
+
+    loginfo error "Warning. Tunnel data file not found. Expected /run/ipsec-partner/status/ip/tunnel/tunnel "
+fi
 
 # exit
 stop
