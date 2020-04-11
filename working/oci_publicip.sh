@@ -43,25 +43,25 @@ function getVNICIp_id() {
     vnic_no=$1
 
     call_id=private_ip_curl
-    timeout 5 curl -s -L http://169.254.169.254/opc/v1/vnics/ > /run/oci/$call_id.out 2> /run/oci/$call_id.err
+    timeout 5 curl -s -L http://169.254.169.254/opc/v1/vnics/ > /run/oci/$call_id\_$OCF_RESKEY_vnic_no.out 2> /run/oci/$call_id\_$OCF_RESKEY_vnic_no.err
     if [ $? -ne 0 ]; then
-        loginfo "getVNICIp_id: Error. $(cat /run/oci/$call_id.out), $(cat /run/oci/$call_id.err)"
+        loginfo "getVNICIp_id: Error. $(cat /run/oci/$call_id\_$OCF_RESKEY_vnic_no.out), $(cat /run/oci/$call_id\_$OCF_RESKEY_vnic_no.err)"
         return 1
     else
-        loginfo "getVNICIp_id: OK. $(cat /run/oci/$call_id.out), $(cat /run/oci/$call_id.err)"
-        vnic_id=$(cat /run/oci/$call_id.out | jq -r .[$vnic_no].vnicId)
+        loginfo "getVNICIp_id: OK. $(cat /run/oci/$call_id\_$OCF_RESKEY_vnic_no.out), $(cat /run/oci/$call_id\_$OCF_RESKEY_vnic_no.err)"
+        vnic_id=$(cat /run/oci/$call_id\_$OCF_RESKEY_vnic_no.out | jq -r .[$vnic_no].vnicId)
         loginfo "getVNICIp_id: $vnic_id"
 
         call_id=private_ip_list
-        timeout 5 oci network private-ip list --vnic-id $vnic_id > /run/oci/$call_id.out 2> /run/oci/$call_id.err
+        timeout 5 oci network private-ip list --vnic-id $vnic_id > /run/oci/$call_id\_$OCF_RESKEY_vnic_no.out 2> /run/oci/$call_id\_$OCF_RESKEY_vnic_no.err
         if [ $? -ne 0 ]; then
-            loginfo "getVNICIp_id: Error. $(cat /run/oci/$call_id.out), $(cat /run/oci/$call_id.err)"
+            loginfo "getVNICIp_id: Error. $(cat /run/oci/$call_id\_$OCF_RESKEY_vnic_no.out), $(cat /run/oci/$call_id\_$OCF_RESKEY_vnic_no.err)"
             return 1
         else
-            privateIp_id=$(cat /run/oci/$call_id.out | 
+            privateIp_id=$(cat /run/oci/$call_id\_$OCF_RESKEY_vnic_no.out | 
             sed 's/is-primary/is_primary/g' | 
             jq -r '.data[] | select(.is_primary == true) | .id')
-            loginfo "getVNICIp_id: OK. $(cat /run/oci/$call_id.out), $(cat /run/oci/$call_id.err)"
+            loginfo "getVNICIp_id: OK. $(cat /run/oci/$call_id\_$OCF_RESKEY_vnic_no.out), $(cat /run/oci/$call_id\_$OCF_RESKEY_vnic_no.err)"
         fi
     fi
     echo $privateIp_id
@@ -70,35 +70,35 @@ function getVNICIp_id() {
 # function getPublicIp_id() {
 #     publicIp_id=$1
 
-#     call_id=public_ip_get
-#     timeout 5 oci network public-ip get --public-ip-address  $publicIp_id >/run/oci/$call_id.out 2> /run/oci/$call_id.err
+#     call_id=public_ip_$OCF_RESKEY_vnic_no\_get
+#     timeout 5 oci network public-ip get --public-ip-address  $publicIp_id >/run/oci/$call_id\_$OCF_RESKEY_vnic_no.out 2> /run/oci/$call_id\_$OCF_RESKEY_vnic_no.err
 #     if [ $? -ne 0 ]; then
-#         loginfo "getPublicIp_id: Error. $(cat /run/oci/$call_id.out), $(cat /run/oci/$call_id.err)"
+#         loginfo "getPublicIp_id: Error. $(cat /run/oci/$call_id\_$OCF_RESKEY_vnic_no.out), $(cat /run/oci/$call_id\_$OCF_RESKEY_vnic_no.err)"
 #         return 1
 #     fi
 
-#     cat /run/oci/$call_id.out | jq -r .data.id
+#     cat /run/oci/$call_id\_$OCF_RESKEY_vnic_no.out | jq -r .data.id
 # }
 
 function hasPublicIp() {
 
     logdebug "hasPublicIp: public-ip get started with $OCF_RESKEY_publicIp"
-    timeout 15 oci network public-ip get --public-ip-address $OCF_RESKEY_publicIp > /run/oci/public_ip_get.json 2>/run/oci/public_ip_get.err
+    timeout 15 oci network public-ip get --public-ip-address $OCF_RESKEY_publicIp > /run/oci/public_ip_$OCF_RESKEY_vnic_no\_get.json 2>/run/oci/public_ip_$OCF_RESKEY_vnic_no\_get.err
     if [ $? -eq 0 ]; then
         logdebug "hasPublicIp: looking for assigned-entity-id..."
-        assigned_entity_id=$(cat /run/oci/public_ip_get.json | 
+        assigned_entity_id=$(cat /run/oci/public_ip_$OCF_RESKEY_vnic_no\_get.json | 
         sed 's/assigned-entity-id/assigned_entity_id/g' | 
         jq -r '.data.assigned_entity_id')
         logdebug "hasPublicIp: assigned-entity-id: $assigned_entity_id"
         if [ "$assigned_entity_id" == "$privateIP_id" ]; then
-            logdebug "hasPublicIp: OK. Response: $(cat /run/oci/public_ip_get.json), $(cat /run/oci/public_ip_get.err)"
+            logdebug "hasPublicIp: OK. Response: $(cat /run/oci/public_ip_$OCF_RESKEY_vnic_no\_get.json), $(cat /run/oci/public_ip_$OCF_RESKEY_vnic_no\_get.err)"
             return 0
         else
-            logdebug "hasPublicIp: Assigned to other. Response: $(cat /run/oci/public_ip_get.json), $(cat /run/oci/public_ip_get.err)"
+            logdebug "hasPublicIp: Assigned to other. Response: $(cat /run/oci/public_ip_$OCF_RESKEY_vnic_no\_get.json), $(cat /run/oci/public_ip_$OCF_RESKEY_vnic_no\_get.err)"
             return 1
         fi
     else
-        logdebug "hasPublicIp: General error: $(cat /run/oci/public_ip_get.json), $(cat /run/oci/public_ip_get.err)"
+        logdebug "hasPublicIp: General error: $(cat /run/oci/public_ip_$OCF_RESKEY_vnic_no\_get.json), $(cat /run/oci/public_ip_$OCF_RESKEY_vnic_no\_get.err)"
     fi
 }
 
@@ -170,15 +170,15 @@ start)
     if hasPublicIp; then
         result=$OCF_SUCCESS
     else
-        call_id=rm_start_public_ip_get
+        call_id=rm_start_public_ip_$OCF_RESKEY_vnic_no\_get
         timeout 5 oci network public-ip update --force \
         --public-ip-id $OCF_RESKEY_publicIp_id \
-        --private-ip-id $privateIP_id >/run/oci/$call_id.out 2> /run/oci/$call_id.err
+        --private-ip-id $privateIP_id >/run/oci/$call_id\_$OCF_RESKEY_vnic_no.out 2> /run/oci/$call_id\_$OCF_RESKEY_vnic_no.err
         if [ $? -ne 0 ]; then
-            loginfo "rm_start: Error. $(cat /run/oci/$call_id.out), $(cat /run/oci/$call_id.err)"
+            loginfo "rm_start: Error. $(cat /run/oci/$call_id\_$OCF_RESKEY_vnic_no.out), $(cat /run/oci/$call_id\_$OCF_RESKEY_vnic_no.err)"
             result=$OCF_ERR_GENERIC
         else
-            loginfo "rm_start: Assigned. $(cat /run/oci/$call_id.out), $(cat /run/oci/$call_id.err)"
+            loginfo "rm_start: Assigned. $(cat /run/oci/$call_id\_$OCF_RESKEY_vnic_no.out), $(cat /run/oci/$call_id\_$OCF_RESKEY_vnic_no.err)"
             result=$OCF_SUCCESS
         fi
     fi
@@ -189,15 +189,15 @@ stop)
     #
     # if hasPublicIp $OCF_RESKEY_publicIp; then
 
-    #     call_id=rm_stop_public_ip_get
+    #     call_id=rm_stop_public_ip_$OCF_RESKEY_vnic_no\_get
     #     timeout 5 oci network public-ip update \
     #     --public-ip-id $oci_publicIp_id \
-    #     --private-ip-id '' >/run/oci/$call_id.out 2> /run/oci/$call_id.err
+    #     --private-ip-id '' >/run/oci/$call_id\_$OCF_RESKEY_vnic_no.out 2> /run/oci/$call_id\_$OCF_RESKEY_vnic_no.err
     #     if [ $? -ne 0 ]; then
-    #         loginfo "rm_stop: Error. $(cat /run/oci/$call_id.out), $(cat /run/oci/$call_id.err)"
+    #         loginfo "rm_stop: Error. $(cat /run/oci/$call_id\_$OCF_RESKEY_vnic_no.out), $(cat /run/oci/$call_id\_$OCF_RESKEY_vnic_no.err)"
     #         result=$OCF_ERR_GENERIC
     #     else
-    #         loginfo "rm_stop: Unassigned. $(cat /run/oci/$call_id.out), $(cat /run/oci/$call_id.err)"
+    #         loginfo "rm_stop: Unassigned. $(cat /run/oci/$call_id\_$OCF_RESKEY_vnic_no.out), $(cat /run/oci/$call_id\_$OCF_RESKEY_vnic_no.err)"
     #         result=$OCF_SUCCESS
     #     fi
     # fi

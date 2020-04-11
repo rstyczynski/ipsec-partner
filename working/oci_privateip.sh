@@ -44,11 +44,11 @@ function hasPrivateIp() {
     oci_private_ip=$1
     oci_vnic_id=$2
 
-    if [ ! -f /run/oci/private_ip.text ]; then
+    if [ ! -f /run/oci/private_ip_$OCF_RESKEY_vnic_no.txt ]; then
         logdebug "hasPrivateIp: Not started"
         return 1
     else
-        privateip_id=$(cat /run/oci/private_ip.text)
+        privateip_id=$(cat /run/oci/private_ip_$OCF_RESKEY_vnic_no.txt)
 
         # I do not want to cal OCI API too frequently
         # anyway is started returning:
@@ -59,8 +59,8 @@ function hasPrivateIp() {
         #     "opc-request-id": "8959A789DB594AC4AE463A248B668B39/3477B5A66D550CDF82E6DD75CFB969C7/263413879E35082A03FAF1BB25EC3310", 
         #     "status": 404
         # }
-        # oci network private-ip get --private-ip-id $privateip_id > /run/oci/private_ip_get.json 2>/run/oci/private_ip_get.err
-        # assigned_vnic_id=$(cat /run/oci/private_ip_get.json | jq -r '.data["vnic-id"]')
+        # oci network private-ip get --private-ip-id $privateip_id > /run/oci/private_ip_$OCF_RESKEY_vnic_no\_get.json 2>/run/oci/private_ip_$OCF_RESKEY_vnic_no\_get.err
+        # assigned_vnic_id=$(cat /run/oci/private_ip_$OCF_RESKEY_vnic_no\_get.json | jq -r '.data["vnic-id"]')
         # if [ "$assigned_vnic_id" == "$oci_vnic_id" ]; then
         #     return 0
         # else
@@ -70,25 +70,25 @@ function hasPrivateIp() {
         # let's use assign  w/o force option
         oci network vnic assign-private-ip \
                 --vnic-id $oci_vnic_id \
-                --ip-address $oci_private_ip > /run/oci/private_ip_gentleassign.json 2>/run/oci/private_ip_gentleassign.err
+                --ip-address $oci_private_ip > /run/oci/private_ip_$OCF_RESKEY_vnic_no\_gentleassign.json 2>/run/oci/private_ip_$OCF_RESKEY_vnic_no\_gentleassign.err
         if [ $? -eq 0 ] ; then
-            if [ $(stat -c%s /run/oci/private_ip_gentleassign.err) -gt 0 ]; then
+            if [ $(stat -c%s /run/oci/private_ip_$OCF_RESKEY_vnic_no\_gentleassign.err) -gt 0 ]; then
 
-                grep "Taking no action as IP address $oci_private_ip is already assigned to VNIC $oci_vnic_id" /run/oci/private_ip_gentleassign.err >/dev/nul 2>&1
+                grep "Taking no action as IP address $oci_private_ip is already assigned to VNIC $oci_vnic_id" /run/oci/private_ip_$OCF_RESKEY_vnic_no\_gentleassign.err >/dev/nul 2>&1
                 if [ $? -eq 0 ]; then 
-                    logdebug "hasPrivateIp: Already assigned. Response: $(cat /run/oci/private_ip_gentleassign.json), $(cat /run/oci/private_ip_gentleassign.err)"
+                    logdebug "hasPrivateIp: Already assigned. Response: $(cat /run/oci/private_ip_$OCF_RESKEY_vnic_no\_gentleassign.json), $(cat /run/oci/private_ip_$OCF_RESKEY_vnic_no\_gentleassign.err)"
                     return 0
                 else
 
-                    logdebug "hasPrivateIp: Error. Response: $(cat /run/oci/private_ip_gentleassign.json), $(cat /run/oci/private_ip_gentleassign.err)"
+                    logdebug "hasPrivateIp: Error. Response: $(cat /run/oci/private_ip_$OCF_RESKEY_vnic_no\_gentleassign.json), $(cat /run/oci/private_ip_$OCF_RESKEY_vnic_no\_gentleassign.err)"
                     return 1
                 fi
             else
-                logdebug "hasPrivateIp: OK. Response: $(cat /run/oci/private_ip_gentleassign.json), $(cat /run/oci/private_ip_gentleassign.err)"
+                logdebug "hasPrivateIp: OK. Response: $(cat /run/oci/private_ip_$OCF_RESKEY_vnic_no\_gentleassign.json), $(cat /run/oci/private_ip_$OCF_RESKEY_vnic_no\_gentleassign.err)"
                 return 0
             fi
         else
-            logdebug "hasPrivateIp: Error. Response: $(cat /run/oci/private_ip_gentleassign.json), $(cat /run/oci/private_ip_gentleassign.err)"
+            logdebug "hasPrivateIp: Error. Response: $(cat /run/oci/private_ip_$OCF_RESKEY_vnic_no\_gentleassign.json), $(cat /run/oci/private_ip_$OCF_RESKEY_vnic_no\_gentleassign.err)"
             return 1
         fi
 
@@ -164,7 +164,7 @@ if [ ! "$action" == "meta-data" ]; then
     loginfo "oci_privateip: Initialized for: $OCF_RESKEY_ip on $vnic_id"
 fi
 
-echo $OCF_RESKEY_ip >/run/oci/private_ip.text
+echo $OCF_RESKEY_ip >/run/oci/private_ip_$OCF_RESKEY_vnic_no.txt
 
 case $action in
 
@@ -177,15 +177,15 @@ start)
         timeout 15 oci network vnic assign-private-ip \
             --vnic-id $vnic_id \
             --unassign-if-already-assigned \
-            --ip-address $OCF_RESKEY_ip > /run/oci/private_ip_assign.json 2>/run/oci/private_ip_assign.err
+            --ip-address $OCF_RESKEY_ip > /run/oci/private_ip_$OCF_RESKEY_vnic_no\_assign.json 2>/run/oci/private_ip_$OCF_RESKEY_vnic_no\_assign.err
         if [ $? -eq 0 ] ; then
             # when already assigned responses with null on stdout, and info on stderr and ecode 0. O means ok. Keep IP
-            echo $OCF_RESKEY_ip >/run/oci/private_ip.text
+            echo $OCF_RESKEY_ip >/run/oci/private_ip_$OCF_RESKEY_vnic_no.txt
             result=$OCF_SUCCESS
-            loginfo "oci_privateip: started OK: $result, $(cat /run/oci/private_ip_assign.json), $(cat /run/oci/private_ip_assign.err)"
+            loginfo "oci_privateip: started OK: $result, $(cat /run/oci/private_ip_$OCF_RESKEY_vnic_no\_assign.json), $(cat /run/oci/private_ip_$OCF_RESKEY_vnic_no\_assign.err)"
         else
             result=$OCF_ERR_GENERIC
-            loginfo "oci_privateip: started with error: $result, $(cat /run/oci/private_ip_assign.json), $(cat /run/oci/private_ip_assign.err)"
+            loginfo "oci_privateip: started with error: $result, $(cat /run/oci/private_ip_$OCF_RESKEY_vnic_no\_assign.json), $(cat /run/oci/private_ip_$OCF_RESKEY_vnic_no\_assign.err)"
         fi
     fi
     ;;
@@ -201,14 +201,14 @@ stop)
     #
     #     timeout 15 oci network vnic unassign-private-ip \
     #         --vnic-id $vnic_id \
-    #         --ip-address $OCF_RESKEY_ip > /run/oci/private_ip_unassign.json 2>/run/oci/private_ip_unassign.err
+    #         --ip-address $OCF_RESKEY_ip > /run/oci/private_ip_$OCF_RESKEY_vnic_no\_unassign.json 2>/run/oci/private_ip_$OCF_RESKEY_vnic_no\_unassign.err
     #     if [ $? -eq 0 ] ; then
-    #         \rm -f /run/oci/private_ip_assign.json
+    #         \rm -f /run/oci/private_ip_$OCF_RESKEY_vnic_no\_assign.json
     #         result=$OCF_SUCCESS
-    #         loginfo "oci_privateip: stopped OK: $result, $(cat /run/oci/private_ip_unassign.json), $(cat /run/oci/private_ip_unassign.err)"
+    #         loginfo "oci_privateip: stopped OK: $result, $(cat /run/oci/private_ip_$OCF_RESKEY_vnic_no\_unassign.json), $(cat /run/oci/private_ip_$OCF_RESKEY_vnic_no\_unassign.err)"
     #     else
     #         result=$OCF_ERR_GENERIC
-    #         loginfo "oci_privateip: stopped with error: $result, $(cat /run/oci/private_ip_unassign.json), $(cat /run/oci/private_ip_unassign.err)"
+    #         loginfo "oci_privateip: stopped with error: $result, $(cat /run/oci/private_ip_$OCF_RESKEY_vnic_no\_unassign.json), $(cat /run/oci/private_ip_$OCF_RESKEY_vnic_no\_unassign.err)"
     #     fi
     # fi
     result=$OCF_SUCCESS
